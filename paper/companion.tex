@@ -1,0 +1,1661 @@
+\documentclass[11pt]{amsart}
+\usepackage[utf8]{inputenc}
+\usepackage{amssymb}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{url}
+\usepackage[hidelinks,bookmarks=true]{hyperref}
+\hypersetup{pdftitle={The Failure That Did Not Happen: Mathematical Companion},pdfauthor={David T. Swanson}}
+
+\def\UrlBreaks{\do\.\do\_\do\/\do\-}
+\DeclareUrlCommand\lean{\urlstyle{tt}}
+\DeclareUrlCommand\script{\urlstyle{tt}}
+\emergencystretch=3em
+\DeclareMathOperator{\ev}{ev}
+\DeclareMathOperator{\res}{res}
+\DeclareMathOperator{\readop}{read}
+\DeclareMathOperator{\con}{con}
+\DeclareMathOperator{\fil}{fil}
+\newcommand{\id}{\mathrm{id}}
+\newcommand{\forbid}{\mathsf{forbid}}
+\newcommand{\allow}{\mathsf{allow}}
+\newcommand{\Tower}{\mathcal{T}}
+\newcommand{\Set}{\mathcal{A}}
+\newcommand{\Case}{\mathcal{C}}
+\newcommand{\Exact}{\mathrm{ex}}
+
+% The items of the book, and one numbering.
+\makeatletter
+\newcount\item@total
+\newcount\entry@done
+\newcommand{\defitem}[5]{%
+  \global\advance\item@total by 1
+  \expandafter\xdef\csname item@seq@#1\endcsname{\the\item@total}%
+  \expandafter\gdef\csname item@kind@#1\endcsname{#2}%
+  \expandafter\gdef\csname item@num@#1\endcsname{#3}%
+  \def\item@a{#2}\def\item@b{Definition}\ifx\item@a\item@b\expandafter\gdef\csname item@tag@#1\endcsname{D#3}\else\expandafter\gdef\csname item@tag@#1\endcsname{#3}\fi
+  \expandafter\gdef\csname item@title@#1\endcsname{#4}%
+  \expandafter\gdef\csname item@text@#1\endcsname{#5}}
+\input{claims}
+\input{numbers}
+
+\newcommand{\standing@proved}{proved here}
+\newcommand{\standing@model}{shown in a model}
+\newcommand{\standing@record}{on the record}
+\newcommand{\standing@open}{not yet established}
+\newcommand{\standing@definition}{a definition}
+
+\newcommand{\itemtag}{F}
+\newcounter{lemma@item}
+\theoremstyle{plain}
+\newtheorem{lemma}[lemma@item]{Lemma}
+\renewcommand{\thelemma@item}{\itemtag.\arabic{lemma@item}}
+\renewcommand{\theequation}{\itemtag.\arabic{equation}}
+
+\newcommand{\maprows}{}
+\newcommand{\maprow}[3]{#1 & #2 & #3\\}
+
+% \entry{key}{standing}{Lean names or scripts}: the heading, the claim in the book's words, the standing, and a row of the closing map.
+\newcommand{\entry}[3]{%
+  \@ifundefined{item@seq@#1}{\PackageError{companion}{No item #1}{}}{}%
+  \global\advance\entry@done by 1
+  \ifnum\entry@done=\csname item@seq@#1\endcsname\else\PackageError{companion}{Entry #1 is out of the book's order}{}\fi
+  \@ifundefined{standing@#2}{\PackageError{companion}{No standing #2}{}}{}%
+  \xdef\itemtag{\csname item@tag@#1\endcsname}%
+  \setcounter{lemma@item}{0}\setcounter{equation}{0}%
+  \par\addvspace{1.6\baselineskip}\noindent
+  \hypertarget{#1}{}\pdfbookmark[1]{\csname item@kind@#1\endcsname\space\csname item@num@#1\endcsname}{#1}%
+  \textbf{\csname item@kind@#1\endcsname\space\csname item@num@#1\endcsname.\space\csname item@title@#1\endcsname}\par\nopagebreak\smallskip
+  {\leftskip=1.5em\rightskip=1.5em\noindent\csname item@text@#1\endcsname\par}\nopagebreak\smallskip
+  \noindent\textit{\csname standing@#2\endcsname}\ifx\relax#3\relax\else\textit{.}\space #3\fi\par\medskip
+  \g@addto@macro\maprows{\maprow{\hyperlink{#1}{\itemref@name{#1}}}{\csname standing@#2\endcsname}{#3}}}
+\newcommand{\itemref@name}[1]{\csname item@kind@#1\endcsname\space\csname item@num@#1\endcsname}
+% \modelentry{key}{tag}{title}{standing}{Lean names or scripts}{the book's words}: a model the book glosses and states no claim of,
+% with its heading, the book's words, its standing and a row of the closing map. It counts no item.
+\newcommand{\modelentry}[6]{%
+  \@ifundefined{standing@#4}{\PackageError{companion}{No standing #4}{}}{}%
+  \xdef\itemtag{#2}%
+  \setcounter{lemma@item}{0}\setcounter{equation}{0}%
+  \par\addvspace{1.6\baselineskip}\noindent
+  \hypertarget{#1}{}\pdfbookmark[1]{Model #2}{#1}%
+  \textbf{Model #2.\space #3}\par\nopagebreak\smallskip
+  {\leftskip=1.5em\rightskip=1.5em\noindent #6\par}\nopagebreak\smallskip
+  \noindent\textit{\csname standing@#4\endcsname}\ifx\relax#5\relax\else\textit{.}\space #5\fi\par\medskip
+  \g@addto@macro\maprows{\maprow{\hyperlink{#1}{Model #2}}{\csname standing@#4\endcsname}{#5}}}
+\newcommand{\itemref}[1]{\@ifundefined{item@seq@#1}{\PackageError{companion}{No item #1}{}}{}\hyperlink{#1}{\itemref@name{#1}}}
+\newcommand{\inlean}[1]{\par\noindent\textit{In Lean.} #1\par\medskip}
+\AtEndDocument{\ifnum\entry@done=\item@total\else\PackageError{companion}{\the\entry@done\space entries for \the\item@total\space items}{}\fi}
+\makeatother
+
+\begin{document}
+
+\title{The Failure That Did Not Happen: Mathematical Companion}
+\author{David T. Swanson}
+\maketitle
+
+\begin{quote}\small
+This paper takes a reader from any claim of \emph{The Failure That Did Not Happen}~\cite{main} to the mathematics behind it. Each of the book's claims and definitions has one entry below, under the book's number and title and in the book's order. The two models the book glosses in its Appendix~B follow the claims they read: Model~S after \itemref{claim:what-lasts-is-what-was-held}, and Model~A after \itemref{claim:what-is-for}. An entry quotes the claim and gives its standing. For a claim proved here it then gives a formal statement, a proof and the name of the Lean theorem that checks it; for a claim shown in a model, the construction and its script; for a claim on the record, the case that carries its sources; for a claim not yet established, what is open. Section~\ref{sec:objects} sets out the formal objects, Section~\ref{sec:entries} holds the entries, and Section~\ref{sec:map} is the map from each item to its standing and its theorem.
+
+The theorems are in Lean~4~\cite{Moura2021} on Mathlib~\cite{Mathlib2020}. A Lean proof confirms that a theorem follows from its hypotheses, and it does not confirm that the formal statement says what a sentence says: a reader compares the two, and each entry puts them side by side for that purpose.
+\end{quote}
+
+\section{The formal objects}
+\label{sec:objects}
+
+Each word of the book's vocabulary reads one formal object, and Table~\ref{tab:words} lists the pairs. The pairing gives each word its reading for the proofs; whether a real arrangement fits that reading is the book's question, as its Appendix~A says. A name in typewriter type is a declaration of the Lean project in \texttt{lean/}, under the namespace \texttt{Companion}.
+
+\begingroup\small
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{9.5em}>{\raggedright\arraybackslash}p{13.5em}>{\raggedright\arraybackslash}p{10em}@{}}
+\caption{The book's words and the objects they read.}\label{tab:words}\\
+\toprule
+The book's word & Formal object & In Lean\\
+\midrule
+\endfirsthead
+\toprule
+The book's word & Formal object & In Lean\\
+\midrule
+\endhead
+state of things & the state that obtains & \lean{Situation}\\
+what would have obtained & the second entry of a situation & \lean{Situation}\\
+what did not happen & a forestalled state & \lean{Situation.Forestalled}\\
+a description & a coarse-graining & \lean{CoarseGraining}\\
+a difference & a pair of distinct states & \texttt{Sym2}\\
+what a description keeps & the pairs outside its kernel & \lean{kernel}\\
+what a description drops & the pairs of distinct states in its kernel & \lean{residue}\\
+a party & a process & \lean{Process}\\
+what a party registers & what its constitution tells apart & \lean{Process.constitution}\\
+the descriptions a party acts through & the coarse-grainings a process makes & \lean{Process.grainings}\\
+a response & a rule applied to what the process makes & \lean{Process.response}\\
+responding to something, following it & following across the accessible states & \lean{Follows}\\
+moving with something & not independent under a weighting of the accessible states & \lean{MovesWith}\\
+moving with something exactly & being fixed by it and varying with it & \lean{Fixes}, \lean{VariesWith}\\
+holding a loss & holding a quantity & \lean{Process.Holds}\\
+holding a prevented failure & holding a quantity of situations & \lean{Process.HoldsOfSituation}\\
+an arrangement of parties & a finite family of processes with a set of joins, which may be empty & \lean{Arrangement}\\
+parties joined & a join, passing what one process makes to another & \lean{Join}\\
+what lies between parties & the between & \lean{Arrangement.between}\\
+carrying what lies between & some response following it & \lean{Follows}\\
+what a party lumps together & the states at which its coarse-grainings, read together, take one value & \lean{Process.lumpedWith}\\
+a level & a depth of nesting & \lean{Nested.AtDepth}\\
+what is paid & the price of a change & \lean{Change.price}\\
+what is let go & the release of a change & \lean{Change.release}\\
+the world changing & a change of the accessible states & \lean{Change}\\
+refinement & a change with a price & \lean{Change.price}\\
+attachment & a change of rules; tying to a held loss is Lemma~\ref{lem:tied} & \lean{Change.ResponseOnly}\\
+forbidding & a response read as forbid or allow & \lean{ForbidAllow}\\
+an outcome & a set of states & \lean{Outcome}\\
+a redescription & a relabelling & \lean{Relabelling}\\
+other causes at work & a change of which accessible state obtains & \lean{Case.HistoryChange}\\
+the shape of an arrangement & its content & \lean{Content}\\
+an account of agents & a function of what the processes are constituted to make & \lean{Arrangement.asProcess}\\
+a run of years & a course & \lean{Course}\\
+a capacity & an upkeep & \lean{Upkeep}\\
+a capacity whose product is a prevented failure & a keeping & \lean{Keeping}\\
+a lapse & what is kept failing, which stays failed along a course that runs it & \lean{Upkeep.stays_lapsed}\\
+its lapse, held, or tied to a held loss & a process holding what is kept or lapsed, whose response reaches the decision itself or through a join & \lean{Upkeep.LapseHeld}\\
+occasions that keep coming & the premise & \lean{Upkeep.Premise}\\
+a claim, a right to a return & a quantity a position's coarse-grainings carry & \lean{Arrangement.Claimable}\\
+effort under a fixed budget & a share by held losses & \lean{Effort.share}\\
+what counts & what something a process makes moves with exactly & \lean{Process.Counts}\\
+a remit & a process carrying a quantity & \lean{Process.RemitFor}\\
+a remedy & a route for a pair, in a setting of one shape & \lean{Remedy}\\
+the distance & the size of a between & \lean{Setting.distance}\\
+correction, of what is kept & a keeping whose product is a purpose not lost, as read at \itemref{claim:what-is-for} & \lean{Keeping}\\
+held correction & that keeping with its lapse held & \lean{Upkeep.LapseHeld}\\
+correcting, on error & correcting on what comes back from an act & \lean{Correcting}\\
+pricing an act & a rule weighing return against held error & \lean{PricedAct}\\
+equivalence & the classes of the kernel of what a process makes, on each of which its response is one & \lean{kernel}\\
+identification & no formal object: the reading of a real arrangement onto these, as the book's Appendix~A says & ---\\
+\bottomrule
+\end{longtable}
+\endgroup
+
+Beside the words, one worked case runs through the entries, the book's bridge from its Section~2.1. A state is three yes-or-no facts, $s=(s_1,s_2,s_3)$: whether the girder shows a crack, whether maintenance is funded, and whether the cable is corroded. That gives $\nBridgeStates$ states and $\nBridgePairs$ pairs of states. The inspection unit reads the crack, the budget office the funding, and \texttt{figures/compute\_toy.py} counts every number below that belongs to this case.
+
+\subsection{States and coarse-grainings}
+
+Throughout, $S$ is a finite non-empty set of \emph{states}, and exactly one of them obtains. One result compares what obtains with what would have, and saying so takes a small piece of data, a \emph{situation}:
+\begin{equation}\label{eq:situation}
+  w=(o_w,\,o_w^\dagger)\in S\times S,
+\end{equation}
+whose first entry is the state that obtains and whose second is the state that would have obtained. The two entries may coincide, and a situation is a pair so that a quantity can be asked to change with the second while the first stays put. A state is \emph{forestalled} in $w$ when it would have obtained and does not, $o_w^\dagger\ne o_w$.
+
+A \emph{coarse-graining} is a map $c:S\to C$ into any set of values. What it declines to distinguish is its \emph{kernel},
+\begin{equation}\label{eq:kernel}
+  \ker c=\bigl\{\{s,t\}:s,t\in S,\ c(s)=c(t)\bigr\},
+\end{equation}
+a set of unordered pairs in which $\{s,s\}$ counts as a pair. So every kernel holds the diagonal $\Delta=\{\{s,s\}:s\in S\}$, and two coarse-grainings with one kernel differ only in the names of their values. A coarse-graining is evaluated in a situation by reading it at the state that obtains, $\ev_w(c)=c(o_w)$.
+
+A \emph{quantity} is any map out of $S$, as a coarse-graining is: the two words mark a use, since a coarse-graining is what gets read and a quantity is what gets asked about. A quantity \emph{separates} a pair when the pair lies outside its kernel. A coarse-graining $c$ \emph{carries} a quantity $q$, written $c\rhd q$, when $q=h\circ c$ for some $h$. Carrying and kernels are one condition seen twice, which the paper calls the \emph{kernel criterion}:
+\begin{equation}\label{eq:criterion}
+  c\rhd q\iff\ker c\subseteq\ker q.
+\end{equation}
+If $q=h\circ c$ then $c(s)=c(t)$ gives $q(s)=q(t)$. Conversely, the inclusion says $q$ is constant on the fibres of $c$, so $h(c(s))=q(s)$ is well defined on the image of $c$; every other value goes to $q(s_0)$ for a fixed state $s_0$. In Lean this is \lean{kernel_subset_of_carries} and \lean{carries_of_kernel_subset}, with \lean{mem_kernel} for the kernel itself.
+
+The one size used below is a count of pairs. The \emph{residue} of a coarse-graining counts the pairs of distinct states in its kernel,
+\begin{equation}\label{eq:residue}
+  \res(c)=\bigl|\ker c\setminus\Delta\bigr|,
+\end{equation}
+each pair counted once. The same count stands behind Ellerman's logical entropy $h$, the share of ordered pairs in different blocks of a partition~\cite{Ellerman2009}, for $h=1-(2\res(c)+|S|)/|S|^2$. No distribution is placed on $S$ anywhere below. The kernels of the maps out of a set, ordered by inclusion, are the lattice of its equivalence relations, which Birkhoff and Ore studied~\cite{Birkhoff1935,Ore1942} and in which Shannon proposed to read a lattice of information~\cite{Shannon1953}. Little of that lattice is used: its order, and once, that its join does not distribute over its meet.
+
+On the bridge, the inspection unit's map $s\mapsto s_1$ has residue $\nInspectionUntold$, every pair agreeing on the crack, and so has the budget office's $s\mapsto s_2$.
+
+\subsection{Processes}
+
+A \emph{process} over $S$ consists of a coarse-graining it is constituted to make, further maps of that coarse-graining's values, and a rule that reads those further values:
+\begin{equation}\label{eq:process}
+  P=\bigl(c,(f_k)_{k\in K},r\bigr),\quad S\xrightarrow{\ c\ }C\xrightarrow{\ f_k\ }V_k,\quad r:\prod_{k\in K}V_k\to R.
+\end{equation}
+Everything else asked of a process comes from these three: the coarse-grainings it \emph{makes}, $g_k=f_k\circ c$; those coarse-grainings read together, $G=(g_k)_{k\in K}$; its \emph{response}, $a=r\circ G$; and its \emph{constitution}, $\ker c$, the pairs it is not constituted to tell apart. Each $g_k$ passes through $c$ because a process makes only what its constitution lets it make, the response passes through $G$ because it responds only through what it makes, and $c$ stands apart from the $g_k$ because a process need not make all that it is constituted to make. The definition is wider than its plain words in one way: $K$ may be empty, and then the process makes nothing and its response is constant. Every universal statement below holds of such a process too, and no existence result has one as its witness.
+
+The plainest process is the \emph{reading} of a map $e:S\to E$, $\readop(e)=(e,(\id_E),\id_E)$, which is constituted to make $e$, makes it, and responds with its value. On the bridge the inspection unit is $\readop(s\mapsto s_1)$ and the budget office is $\readop(s\mapsto s_2)$. A process's coarse-grainings, read together, carry a quantity when $G\rhd q$, and the rule may be replaced: $P^{r'}$ is $P$ with the rule $r'$ and all else as it was.
+
+\subsection{Accessible states, following and holding}
+
+The \emph{accessible states} are a set $X\subseteq S$, those that can obtain under the present constraints, and a statement made across them says nothing of the other states. Across $X$, a quantity $q$ \emph{fixes} a quantity $b$, written $q\rhd_Xb$, and $b$ \emph{varies with} $q$, written $b\bowtie_Xq$, when
+\begin{equation}\label{eq:follow}
+  \begin{gathered}
+  q\rhd_Xb\iff\forall s,t\in X:\ q(s)=q(t)\Rightarrow b(s)=b(t),\\
+  b\bowtie_Xq\iff\exists s,t\in X:\ q(s)\ne q(t)\ \text{ and }\ b(s)\ne b(t).
+  \end{gathered}
+\end{equation}
+A response \emph{follows} $q$ across $X$ when $q\rhd_Xa$ and $a\bowtie_Xq$, and a process \emph{holds} $q$ across $X$ when moreover $G\rhd q$. The first line of Eq.~\eqref{eq:follow} makes the response a function of $q$ on $X$, and the second rules out the constant responses that every $q$ fixes, in the weakest form that does: at one pair of states both differ. So following is the reading of ``responds to'' and asks little, and holding adds only that the quantity reaches the process through what it makes.
+
+A quantity of situations can be asked after in the same way. A coarse-graining $c$ carries $F:S\times S\to Q$ when $F(w)=h(\ev_w(c))$ for some $h$ and every $w$. A process \emph{holds $F$ across} a set $W$ of situations when $G$ carries $F$ and the quantity $w\mapsto a(o_w)$ follows $F$ across $W$. A quantity $F$ \emph{depends on a forestalled state}, written $\mathrm{dep}(F)$, when it changes with that state while the state that obtains stays the same:
+\begin{equation}\label{eq:dep}
+  \exists w,w':\quad o_w^\dagger\ne o_w,\quad o_{w'}^\dagger\ne o_{w'},\quad o_w=o_{w'},\quad F(w)\ne F(w').
+\end{equation}
+Both forestalled conditions are there because the definition concerns what did not happen: a situation with nothing forestalled is no evidence of dependence on a forestalled state.
+
+\subsection{Arrangements and the between}
+
+An \emph{arrangement} is a finite family of processes $(P_i)_{i\in I}$ with a set of joins, where $P_i=(c_i,(f^i_k)_k,r_i)$ and $g^i_k$, $G_i$, $a_i$ are as before. A \emph{join} is one process making a coarse-graining of the values of a coarse-graining another makes: a taker $i$, a giver $i'\ne i$, indices $k$ of $i$ and $k'$ of $i'$, and a map $\varphi$ with
+\begin{equation}\label{eq:join}
+  g^{i}_{k}=\varphi\circ g^{i'}_{k'}.
+\end{equation}
+The family is indexed by positions so that one process can be followed through a change, and so one process may stand at two positions. The \emph{between} of an arrangement is the set of pairs of distinct states no process in it is constituted to tell apart,
+\begin{equation}\label{eq:between}
+  B(A)=\bigl\{\{s,t\}:\ s\ne t,\ \ \{s,t\}\in\ker c_i\ \text{ for all }i\in I\bigr\},
+\end{equation}
+and its size is the arrangement's residue, $\res(A)=|B(A)|$. It reads the constitutions and nothing else: not what the processes make, not their joins, not any accessible set. On the bridge the between of the two offices is the $\nBridgeBetween$ pairs that differ only in corrosion, out of the $\nBridgePairs$.
+
+An arrangement read as one process, $\widehat A$, is constituted to make the joint coarse-graining $\hat c=(c_i)_{i\in I}$, makes every $g^i_k$ as a map of that joint value, and responds with $\hat a=(a_i)_{i\in I}$. An \emph{account} of an arrangement is any quantity $h\circ\hat c$. Since each $a_i$ is itself a function of $c_i$, an account may hold what each process registered and did.
+
+An arrangement \emph{nests} when some of its processes are arrangements, and each depth of nesting is a \emph{level}. A \emph{nested arrangement} is a triple $N=(P,A,\iota)$: an arrangement $A$ over $I$, its own level; a process $P$, what $N$ is at the level above; and, for each position $i$, either a nested arrangement $\iota(i)$ or nothing. $N$ stands at depth $0$ of itself, and what stands at depth $d$ of $\iota(i)$ stands at depth $d+1$ of $N$. The definition leaves open what constitution an arrangement has as a process, so $P$ is data. The between at a level reads every arrangement at that depth,
+\begin{equation}\label{eq:between-level}
+  B_d(N)=\bigl\{z\notin\Delta:\ z\in\ker c_Q\text{ for each process }Q\text{ at depth }d\bigr\},
+\end{equation}
+so that $B_0(N)=B(A)$. A level is \emph{built from} the one below it when each of its positions is a nested arrangement standing as the process there, with that process no finer than its members together: $\iota(i)=(P_i,A_i,\iota_i)$ with $\ker\hat c_{A_i}\subseteq\ker c_i$.
+
+\subsection{Changes}
+
+A \emph{change} $\Theta=(A,A',X,X')$ compares two arrangements over one set of positions and the same accessible states, $X=X'$, or one arrangement over two sets of accessible states, $A=A'$, which is a \emph{change of the world}. It compares; nothing here says how one becomes the other. A process absent from an arrangement tells nothing apart in it: its constitutive map is constant, so all pairs lie in its constitution. At each position a change has a \emph{price} and a \emph{release},
+\begin{equation}\label{eq:price}
+  \pi_i(\Theta)=\ker c_i\setminus\ker c_i',\qquad\rho_i(\Theta)=\ker c_i'\setminus\ker c_i,
+\end{equation}
+the pairs it comes to tell apart and the pairs it stops telling apart. A \emph{change of rules} keeps the accessible states, every $c_i$, every $f^i_k$ and every join, and replaces rules. A change at one position replaces $a_i$ by $r'\circ G_i$ and leaves every other process.
+
+\subsection{Outcomes}
+
+An \emph{outcome} is a set of states $O\subseteq S$. Some arrangements have responses that only forbid or allow: each value of each response is read by a map $v_i:R_i\to\{\forbid,\allow\}$, with $b_i=v_i\circ a_i$ and $F_i=b_i^{-1}(\forbid)$. A response \emph{excludes} $O$ when it forbids at every state in it, and the arrangement \emph{reaches} $O$ when at some state in it none of its responses forbids:
+\begin{equation}\label{eq:outcome}
+  b_i\text{ excludes }O\iff O\subseteq F_i,\qquad A\text{ reaches }O\iff O\not\subseteq\bigcup_iF_i.
+\end{equation}
+
+\subsection{Content and invariance}
+
+A \emph{setting} is an arrangement with its accessible states, $\Set=(A,X)$, with at least one state accessible. A \emph{relabelling} from $\Set$ over $S,I$ to $\Set'$ over $S',I'$ is a pair of bijections $\tau:S\to S'$ and $\lambda:I\to I'$ such that
+\begin{equation}\label{eq:relabelling}
+  \begin{gathered}
+  s\in X\iff\tau(s)\in X',\qquad z\in\ker c_i\iff\tau(z)\in\ker c'_{\lambda(i)},\\
+  \forall q:\ P_i\text{ holds }q\text{ across }X\iff P'_{\lambda(i)}\text{ holds }q\circ\tau^{-1}\text{ across }X',
+  \end{gathered}
+\end{equation}
+and each join of $\Set$ is matched by a join of $\Set'$, and each of $\Set'$ by one of $\Set$, with taker to taker and giver to giver under $\lambda$, and with $\tau$ carrying the kernels of source and made onto those of the match. Two settings have one \emph{content} when there is a relabelling between them. Eq.~\eqref{eq:relabelling} lists what a content is made of, so it is worth saying what it leaves out: the names of a process's values, its rule as a map, and any coarse-graining it makes that is neither held nor in a join.
+
+A \emph{case} is a setting with a state that obtains, $\Case=(\Set,o)$ with $o\in X$, and its \emph{history} is which accessible state that is. A \emph{feature} is a map on the cases over given $S$ and $I$. A feature is \emph{invariant} under a kind of change when every change of that kind leaves it as it was. Two kinds matter here: \emph{relabellings}, which take $(\Set,o)$ to $(\Set',\tau(o))$, and \emph{changes of history}, which keep the setting and take any $o$ to any $o'$.
+
+\subsection{Cuts}
+
+A \emph{cut} is a triple $\kappa=(d,\sigma,T)$: a level $d$; a \emph{scale} $\sigma:S\to\Sigma$, a coarse-graining of the states; and a \emph{span} $T$, a finite non-empty set indexing the histories read together. A cut \emph{stands} at $N$ when an arrangement stands at depth $d$. Write $S_\sigma=S/\ker\sigma$ for the \emph{coarse states}, with $[s]$ the coarse state of $s$, and for a process $P$ let $\approx_c$ and $\approx_G$ be the equivalences on $S$ generated by $\ker c\cup\ker\sigma$ and by $\ker G\cup\ker\sigma$. Two readings of $P$ at $\sigma$ are defined, both over $S_\sigma$, both constituted to make $[s]\mapsto[s]_{\approx_c}$, and both making the one map $[s]\mapsto[s]_{\approx_G}$. They differ in the rule:
+\begin{equation}\label{eq:readings}
+  \text{total: }V_\sigma[s]=\bigl\{a(t):t\approx_Gs\bigr\},\qquad
+  \text{exact: }a^{\Exact}[s]=a(s)\quad\text{where }\ker\sigma\subseteq\ker a.
+\end{equation}
+The total reading exists at every scale. The exact reading keeps the process's response, and it exists only where the scale identifies no pair the response separates. Over a span $T$, a process reads a state for each history: $P^T$ has states $S^T$, constitutive map $x\mapsto(c(x_t))_t$, coarse-grainings $x\mapsto g_k(x_t)$ and response $x\mapsto(a(x_t))_t$. Where $\kappa$ stands at $N$, what it reads is the arrangement $N^\kappa$ over the cut's states $(S_\sigma)^T$, with a position for each arrangement $M$ at depth $d$, holding the total reading $(\widehat M^\sigma)^T$, and with every join that stands between those processes. The cut \emph{reads exactly} where no response at its level separates a pair $\sigma$ identifies, and then $N^{\kappa,\Exact}$ holds the exact readings.
+
+\subsection{Courses, and what is kept along them}
+
+A \emph{course} is one state obtaining at each step of an indefinite span, $x:\mathbb{N}\to S$. It is a point of $S^{\mathbb{N}}$, the states of a process read over the span $\mathbb{N}$, with that span's order, and at each step the history is still which accessible state obtains. Nothing below generates a course. No statement here says how one state becomes another: a course is given, and the next definition says when it runs what is kept.
+
+An \emph{upkeep} $K$ of an arrangement is what the arrangement keeps or lets lapse: a quantity $k$ of the state, kept or lapsed; a set $D$ of deciding positions; and a rule on their responses, which gives the \emph{decision} $\delta_K(s)$, whether the responses at $s$ keep it. A course \emph{runs} $K$ when
+\begin{equation}\label{eq:runs}
+  k(x_{t+1})\iff k(x_t)\ \text{ and }\ \delta_K(x_t)\qquad\text{for every }t.
+\end{equation}
+So its value at each step is set by responses at the step before, once lapsed it stays lapsed, and all else about each step is free. A \emph{keeping} is an upkeep with a product $F$ such that $\mathrm{dep}(F)$: the book's capacity reads as an upkeep, and a capacity whose product is a prevented failure as a keeping. Its \emph{lapse is held} across $X$ when some process holds $k$ across $X$, which is \itemref{definition:holding-loss} read at that quantity, and its response reaches the decision. Either it sits at a position of $D$, or a join passes it to one: what the join passes carries the holder's response, and the response at that position of $D$ follows the holder's across $X$. Either way the decision reads what the process at $D$ responds: at some state of $X$ where $K$ is kept the responses keep it, and with that process's response at a state of $X$ where $K$ has lapsed, every other response as it was, they do not. A process at $D$ told of a holder, whose response does not follow it, does not make the lapse held.
+
+Over a course $x$, the \emph{premise} on $K$ and $X$ has two clauses:
+\begin{equation}\label{eq:premise}
+  \begin{gathered}
+  \forall s\in X\text{ with }k(s):\quad\exists t\ \ \forall i\in D:\ \ a_i(x_t)=a_i(s);\\
+  K\text{'s lapse is not held across }X\ \Longrightarrow\ \exists s\in X:\ \ k(s)\text{ and not }\delta_K(s).
+  \end{gathered}
+\end{equation}
+The first says that over the course's whole span, what the deciding processes respond takes every value it has at the accessible states where $K$ is kept. The second says that where the lapse is not held, one of those values does not keep it. The book's Section~2.4 has both, as occasions that keep coming on which keeping a capacity costs someone and losing it costs no one. The premise says which courses and keepings a result speaks of, its first clause of a course and its second of a keeping and the accessible states. It is proved by nothing, and each theorem that uses it has it as a hypothesis.
+
+\subsection{Claims, effort, what counts, remedies and correction}
+
+A \emph{claim} of position $i$ is a quantity $G_i$ carries. The name is the book's, from Section~3.6: a right to a return that pays on what its party registers.
+
+A \emph{fixed budget of effort} divides a whole among finitely many uses by the losses held on them. Given a \emph{profile} $\ell$ of a loss for each use, and a weight $w$ never below nothing and rising with the loss, the share of a use is
+\begin{equation}\label{eq:share}
+  e_\ell(u)=\frac{w(\ell(u))}{\sum_vw(\ell(v))}.
+\end{equation}
+Holding has no size, so a profile says what a weight then reads. The rule is the whole of what ties effort to what is held, and the theorems that use it say so.
+
+A quantity $q$ \emph{counts} for a process across $X$ when something it makes moves with $q$ exactly there: some $b$ with $G\rhd b$, $q\rhd_Xb$ and $b\bowtie_Xq$. A \emph{remit} for $q$ is a process with $G\rhd q$.
+
+A \emph{remedy} in the shape of a setting $\Set'$ has a setting $\Set=(A,X)$, as it stood before the remedy, a relabelling $(\tau,\lambda)$ from $\Set$ to $\Set'$, and a pair $z\in B(A)$, with one of two routes. By a price, some change from $A$ takes $z$ out of the between. By a tie, a position $i$ with $\ker c_i\subseteq\ker\ell$ does not yet hold $\ell$ across $X$, and a quantity $q$ separating $z$ has $q\rhd_X\ell$ and $\ell\bowtie_Xq$. The \emph{distance} of $\Set'$ is $\res(A')$, the size of its between, since every pair of a between can be carried at a price, by Eq.~\eqref{eq:exact-kind} at \itemref{claim:exact-kind}.
+
+A process \emph{corrects} along a course, on what comes back as wrong from an act, when $G\rhd w$ for a quantity $w$ saying it was wrong, and for each $t$,
+\begin{equation}\label{eq:correcting}
+  \mathrm{corr}(x_{t+1})\Rightarrow w(x_{t+1}),\qquad w(x_{t+1})\Rightarrow\mathrm{act}(x_t).
+\end{equation}
+The first says a correction is made only where what it registers says it was wrong. The second says that says so only after an act. Here $\mathrm{act}$ is any quantity of the state, tied to the process by nothing in the definition (\lean{Correction.any_act}), as the book's ``from acts'' has it. An act is \emph{priced} at weight $c$ where what it returns exceeds the loss held on its being wrong, less any held on waiting at weight $v$:
+\begin{equation}\label{eq:priced}
+  \mathrm{act}_{c,v}(s)\iff c\,\mathrm{err}(s)<\mathrm{ret}(s)+v\,\mathrm{wait}(s),\qquad\mathrm{err},\mathrm{wait}\ge0.
+\end{equation}
+This is the book's ``price every act at the heaviest loss'' as a rule. A process reading those three quantities can have it as its response (\lean{pricedProcess}).
+
+\section{The claims}
+\label{sec:entries}
+
+\entry{definition:party}{definition}{\lean{Process}}
+A party reads as a process, Eq.~\eqref{eq:process}. ``Anything that responds'' is why a process has a rule: its response is the rule's value at what it makes, a quantity of the states with no agency in the word. The list of offices and firms, and the forms responding takes in a society, tie the word to a society's cases and enter no proof.
+
+\entry{definition:what-party-registers}{definition}{\lean{Process.constitution}}
+What a party registers reads as what its constitution tells apart: the pairs of distinct states outside $\ker c$. The definition's second sentence is why $c$ stands apart from the further maps and the rule in Eq.~\eqref{eq:process}: the constitution is part of what the process is, and \itemref{claim:not-supplied-from-outside} shows that nothing told to it moves that part. The word ``registers'' and the phrase ``the descriptions it acts through'' read two objects, $\ker c$ and the $g_k$, and they can differ, since a process need not make all it is constituted to make: \lean{tellsBothMakesFirst} is constituted to tell two bits apart and makes only the first.
+
+A party, and so a holder, is what it is on each occasion it responds, as the book says after the definition. A party that changes between occasions reads as a course of arrangements, as at \itemref{claim:what-is-for}, and a channel's own keeping enters as a coordinate of the state, as in Lemmas~\ref{lem:reform-decays} and~\ref{lem:reform-keeps-fix}.
+
+\entry{claim:inherited-not-emergent}{proved}{\lean{Composition.inherited}, \lean{Composition.nesting}, \lean{Regress.uptake}}
+The claim has a premise and a step. Its premise, that every social response is carried out by something physical, ties the word ``social'' to its cases and stays in the book. Its step is what is proved: whatever is composed from processes is a process, so a limit on every process is a limit on it.
+
+Let $A$ be an arrangement and $h$ any function of its responses. The \emph{composite} $A^h$ is $\widehat A$ with the rule $h\circ\hat a$. For every property $\Lambda$ of processes that holds of every process,
+\begin{equation}\label{eq:inherited}
+  \Lambda(A^h),\qquad\ker c_{A^h}=\ker\hat c,\qquad a_{A^h}(s)=h\bigl((a_i(s))_{i\in I}\bigr).
+\end{equation}
+So a response built from responses, by any function, is the response of a process constituted to make the joint coarse-graining, and it meets whatever every process meets.
+
+\begin{proof}
+$\widehat A$ is a process by construction, and replacing a rule leaves a process. Each $a_i$ reads what $P_i$ makes, so $h\circ\hat a$ is a function of what $\widehat A$ makes, and the two values agree at every state. The first statement of Eq.~\eqref{eq:inherited} is then the hypothesis on $\Lambda$.
+\end{proof}
+
+The next lemma says what a composite cannot gain, whichever function builds it.
+
+\begin{lemma}[Nesting]\label{lem:nesting}
+For any family $c_k:S\to C_k$ and any $h:\prod_kC_k\to D$, $\bigcap_k\ker c_k\subseteq\ker\bigl(h\circ(c_k)_k\bigr)$.
+\end{lemma}
+\begin{proof}
+If $c_k(s)=c_k(t)$ for all $k$, the two tuples are equal, so $h$ gives them one value.
+\end{proof}
+
+No process appears in Lemma~\ref{lem:nesting}, which is why it can be used of anything composed from anything. Its use at a join, where a coarse-graining is taken up, is Lemma~\ref{lem:uptake} under \itemref{claim:every-level-every-join}.
+
+\entry{claim:condition-response}{proved}{\lean{Response.condition}, \lean{Law.obtains}, \lean{Law.constitution}, \lean{Law.factorization}}
+For every process $P$ there is a map $h$ on the values of $c$ such that, in every situation $w$,
+\begin{equation}\label{eq:condition}
+  a(o_w)=h\bigl(\ev_w(c)\bigr).
+\end{equation}
+The two clauses of the claim are the two parts of the right side: the response passes through $c$, which is what the party registers, and $c$ is read at $o_w$, which is what actually obtains. What would have obtained, the second entry of $w$, appears nowhere in it.
+
+\begin{proof}
+Take $h(v)=r\bigl((f_k(v))_{k\in K}\bigr)$. Both sides are then $r(G(o_w))$.
+\end{proof}
+
+Eq.~\eqref{eq:condition} gathers three laws, each true by unfolding one definition, for every coarse-graining $c$, all situations $w,w'$, every process $P$ and every $k\in K$:
+\begin{align}
+  \ev_w(c)&=c(o_w)\quad\text{and}\quad \ev_{w'}(c)=\ev_w(c)\ \text{ whenever } o_{w'}=o_w, \label{eq:law-obtains}\\
+  g_k&=f_k\circ c\quad\text{and}\quad \ker c\subseteq\ker g_k, \label{eq:law-constitution}\\
+  a&=r\circ G. \label{eq:law-factorization}
+\end{align}
+The first says a coarse-graining is evaluated only on the state that obtains, whatever would have obtained. The second says a coarse-graining factors through the constitution of the process that makes it, and the third that a response depends on the states only through what its process makes, read together. The first follows by unfolding $\ev$ and applying $c$ to $o_{w'}=o_w$, the second by unfolding $g_k$ and applying $f_k$ to $c(s)=c(t)$, and the third by unfolding $a$. They are set out because the results on responses use nothing besides them, so whatever strength those results have lies in the definition of a process.
+
+\entry{claim:silence}{proved}{\lean{Response.silence}, \lean{mem_response_of_mem_constitution}; \script{compute_toy.py}}
+For every process $P$ and all states $s,t$,
+\begin{equation}\label{eq:silence}
+  \bigl(g_k(s)=g_k(t)\ \text{ for all }k\in K\bigr)\ \Longrightarrow\ a(s)=a(t),
+\end{equation}
+and in particular $\ker c\subseteq\ker a$. The hypothesis speaks only of what the process makes, so no other quantity enters it: a quantity may take any two values at $s$ and $t$, which is the claim's ``however much the difference matters''.
+
+\begin{proof}
+The hypothesis says $G(s)=G(t)$, and $a=r\circ G$. The inclusion follows from $\ker c\subseteq\ker g_k$ for each $k$, Eq.~\eqref{eq:law-constitution}.
+\end{proof}
+
+The claim's first sentence says of a description what holds of every map that is not injective. A map drops a pair of distinct states if and only if it is not injective, and a process reading the whole state drops nothing: the constitution of \lean{Process.discrete} holds the diagonal alone, by \lean{not_mem_constitution_discrete}. So what is proved of that sentence is that a description drops some difference unless it tells every two states apart.
+
+On the bridge, the inspection unit's response under any rule takes one value on the $\nInspectionUntold$ pairs that agree on the crack, among them the two bridges of the book's Section~2.1.
+
+\entry{claim:no-recovery}{proved}{\lean{Regress.no_recovery}, \lean{Regress.careful}, \lean{Regress.monotonicity}, \lean{Regress.convergence}; \script{compute_toy.py}}
+A \emph{chain} is a first coarse-graining $c_0:S\to V_0$ with a further map $\varphi_n:V_n\to V_{n+1}$ at each step, which reaches $c_{n+1}=\varphi_n\circ c_n$: a summary of the record, a report on the summary, an audit of the report. Along every chain, for all $m\le n$ and every map $g$ on $V_n$,
+\begin{equation}\label{eq:no-recovery}
+  \ker c_m\subseteq\ker(g\circ c_n),
+\end{equation}
+and for every injective $g$ on the values of any $c$, $\ker(g\circ c)=\ker c$. The inclusion is ``none restores what an earlier one dropped'', and $g$ ranges over every further description. The equality is ``nor by describing the description more carefully'': the finest description of a description tells apart what that description told apart, and no more.
+
+\begin{proof}
+Applying $\varphi_n$ to $c_n(s)=c_n(t)$ gives $\ker c_n\subseteq\ker c_{n+1}$, so the kernels grow from $m$ to $n$, and applying $g$ gives the last step. If $g$ is injective, $g(c(s))=g(c(t))$ if and only if $c(s)=c(t)$.
+\end{proof}
+
+The remaining clause, ``each further step can drop more'', is a count.
+
+\begin{lemma}[Monotonicity]\label{lem:monotonicity}
+For $c:S\to C$ and $g:C\to D$, $\res(c)\le\res(g\circ c)$, and $\res(c)<\res(g\circ c)$ if and only if there are $s,t$ with $c(s)\ne c(t)$ and $g(c(s))=g(c(t))$. If $S$ holds two distinct states, there are $c$ and $g$ with $\res(c)<\res(g\circ c)$.
+\end{lemma}
+\begin{proof}
+A larger kernel holds at least as many pairs of distinct states. If the count is strict, some pair of distinct states lies in $\ker(g\circ c)$ and not in $\ker c$, and that pair is the $s,t$ asked for. Conversely such $s,t$ are distinct, and $\{s,t\}$ lies in the larger kernel and not in the smaller. The last sentence takes $c=\id_S$ and $g$ constant.
+\end{proof}
+\inlean{\lean{Regress.monotonicity}, \lean{residue_can_grow_of_ne}.}
+
+The nearest familiar statement is the data-processing inequality, $I(X;Y)\ge I(X;Z)$ for a Markov chain $X\to Y\to Z$~\cite{CoverThomas2006}, whose deterministic case $Z=g(Y)$ points the same way. Lemma~\ref{lem:monotonicity} sets two counts of pairs against each other under no distribution, and it comes from a set inclusion.
+
+\begin{lemma}[Convergence]\label{lem:convergence}
+Along every chain there is $N$ with $\ker c_n=\ker c_N$ for all $n\ge N$.
+\end{lemma}
+\begin{proof}
+The kernels are an increasing sequence of subsets of a finite set of pairs, so they stop growing. $N$ depends on the chain, since a chain may stand still for some steps and then grow again.
+\end{proof}
+\inlean{\lean{Regress.convergence}.}
+
+\begin{lemma}[Closure]\label{lem:closure}
+For $c:S\to C$, $g:C\to D$ and every situation $w$, $\ev_w(g\circ c)=g(\ev_w(c))$ and $\ev_w(c)=c(o_w)$.
+\end{lemma}
+\begin{proof}
+By Eq.~\eqref{eq:law-obtains} at \itemref{claim:condition-response}, both sides of the first equation are $g(c(o_w))$.
+\end{proof}
+\inlean{\lean{Regress.closure}.}
+
+Lemma~\ref{lem:closure} adds what a regress might be expected to lose: however many maps are stacked, each reads what the one below it gave at the state that obtains. On the book's case records, $\nRecordsStates$ states and $\nRecordsPairs$ pairs, the chain of summary, report and dashboard leaves $\nSummaryUntold$, $\nReportUntold$ and $\nDashboardUntold$ pairs untold apart, and a redesign of the dashboard leaves $\nDashboardUntold$ again.
+
+\entry{claim:non-event}{proved}{\lean{Response.nonevent}, \lean{Response.holds_nothing_forestalled}}
+Each of the three sentences has its part below, for every coarse-graining $c$, every process $P$ and every quantity $F$ of situations:
+\begin{equation}\label{eq:nonevent}
+  \begin{gathered}
+  \mathrm{dep}(F)\ \Longrightarrow\ c\not\rhd F,\\
+  \bigl(v(s,t)\ne v(s,t')\ \text{ for some }s,\ t\ne s,\ t'\ne s\bigr)\ \Longrightarrow\ \mathrm{dep}(F_v),\\
+  \mathrm{dep}(F)\ \Longrightarrow\ P\text{ holds }F\text{ across no set of situations},
+  \end{gathered}
+\end{equation}
+where $v:S\times S\to Q$ and $F_v(w)=v(o_w,o_w^\dagger)$. The first line is ``registered by no party'' and ``no description keeps a difference whose other side never happened''. The second is what the value of a prevented failure comes to: $v$ reads what obtains and what would have, and the claim's words apply where that value changes with what would have obtained. The third is ``no party holds a prevented failure as a loss'', with holding as in \itemref{definition:holding-loss} read on situations.
+
+\begin{proof}
+Two situations with one state that obtains give $c$ one value, by Eq.~\eqref{eq:law-obtains}. So anything $c$ carries takes one value in both, and $F$ takes two. In the second line the situations $(s,t)$ and $(s,t')$ are the witnesses. In the third, holding asks that $G$ carry $F$, which the first line rules out.
+\end{proof}
+
+The condition in the second line has content, and the next lemma gives its reach.
+
+\begin{lemma}\label{lem:nonevent-reach}
+If $|S|\le2$, no quantity of situations depends on a forestalled state, and for every $v$ some quantity carried by $\id_S$ agrees with $F_v$ on every situation where something is forestalled. On any $S$, a quantity taking two values at one state that obtains is carried by no coarse-graining, whether or not anything is forestalled in either situation.
+\end{lemma}
+\begin{proof}
+Two situations with one state that obtains, each with something forestalled and with different values of $F$, must differ in their second entries, and that takes three states. Where something is forestalled on two states, the state that would have obtained is the other one, a function of the state that obtains. The last sentence is the proof of Eq.~\eqref{eq:nonevent} with the forestalled conditions set aside.
+\end{proof}
+\inlean{\lean{not_dependsOnForestalled_of_card_le_two}, \lean{every_forestalled_value_carried_on_two_states}, \lean{not_carries_of_differs}, \lean{nonevent_beyond_forestalled}.}
+
+Holding on situations is holding as defined, wherever both apply, and it is stricter than following.
+
+\begin{lemma}\label{lem:holding-situations}
+For $q:S\to Q$ and $X\subseteq S$, $P$ holds $q$ across $X$ if and only if $P$ holds $w\mapsto q(o_w)$ across the situations whose state lies in $X$. And there are $P$ and $W$ on three states with $F(w)=o_w^\dagger$ such that $\mathrm{dep}(F)$ and $w\mapsto a(o_w)$ follows $F$ across $W$.
+\end{lemma}
+\begin{proof}
+Each clause of holding reads values at the state that obtains, and every state obtains in the situation $(s,s)$. For the second sentence let $P=\readop(\id)$ on $\{0,1,2\}$ and $W=\{(0,1),(1,2)\}$: what would have obtained takes one value at each state of $W$ and differs between them, and the situations $(0,1)$ and $(0,2)$ give $\mathrm{dep}(F)$.
+\end{proof}
+\inlean{\lean{Process.holdsOfSituation_iff}, \lean{Response.prevented_followed_not_held}.}
+
+The second sentence of Lemma~\ref{lem:holding-situations} is where a forecast stands, which the book's Section~2.2 takes up: a response can follow what would have obtained across situations in which that moves with what obtains, through what it registers, and no process holds it there.
+
+\entry{claim:borrowing}{proved}{\lean{Response.borrowing}, \lean{Response.borrowing_every}, \lean{Response.as_far_as}, \lean{MovesWith}}
+Read ``responds to'' as follows across $X$. For every process $P$, every $X$ and every $q$ with $G\not\rhd q$ and $a$ following $q$ across $X$,
+\begin{equation}\label{eq:borrowing}
+  \begin{gathered}
+  \exists b:\quad G\rhd b,\quad b\rhd a,\quad q\rhd_Xb,\quad b\bowtie_Xq,\quad b\not\rhd q;\\
+  \forall b\text{ with }G\rhd b\text{ and }b\rhd a:\ \ b\bowtie_Xq,\ \ b\not\rhd q,\ \ \exists h:\ a=h\circ b,\ q\rhd_X(h\circ b).
+  \end{gathered}
+\end{equation}
+The first line says there is something registered that moves with $q$ and passes it on, and Eq.~\eqref{eq:law-factorization} makes the response itself such a quantity. The second is the stronger reading of ``only through'': whatever carried quantity the response passes through varies with what is followed and cannot carry it, and what $q$ fixes is the part that quantity passes on to the response.
+
+\begin{proof}
+For the first line take $b=a$: $G$ carries it, the identity makes it carry $a$, and it follows $q$ by hypothesis; if it carried $q$, then $G$ would too, by composing the two factorings. For the second, write $a=h\circ b$. Following gives $s,t\in X$ with $q(s)\ne q(t)$ and $a(s)\ne a(t)$, and then $b(s)\ne b(t)$, so $b$ varies with $q$. If $b$ carried $q$ then $G$ would, as before. And $q$ fixes $a=h\circ b$ because $a$ follows $q$.
+\end{proof}
+
+That is as far as ``only through'' goes, for $q$ need not fix the carried quantity itself. On three bits, a process that reads the first two and responds with the first follows the third across the states where first and third agree, and the third bit does not fix what the process reads, since the second bit is free (\lean{borrowing_fixes_can_fail}). That is why moving with is not being fixed by.
+
+The claim's last clause, ``only as far as it moves with it'', reads with the book's Section~2.2, where moving with is not being independent over the cases at hand. Weight $X$ by a measure $\mu$ positive at each state of $X$ and nothing outside it; the count of cases is one such weighting. Then $b$ \emph{moves with} $q$ across $X$ when $b$ and $q$ are not independent under $\mu$, and how far is read as $I_\mu(q;b)$, the divergence of their joint law from the product of their laws.
+
+\begin{lemma}[As far as]\label{lem:as-far-as}
+For every process $P$, every $X$ and weighting $\mu$ of it, every $q$, and every $b$ with $b\rhd a$: (i) $I_\mu(q;a)\le I_\mu(q;b)$; (ii) if $b$ does not move with $q$ across $X$, neither does $a$; (iii) if $q\rhd_Xb$ and $b\bowtie_Xq$, then $b$ moves with $q$ across $X$.
+\end{lemma}
+\begin{proof}
+(i) $a=h\circ b$, and divergence does not grow under a map, here $(q,b)\mapsto(q,h(b))$, applied to the joint law and to the product of the laws. (ii) A function of a quantity independent of $q$ is independent of $q$. (iii) Take $s,t\in X$ with $q(s)\ne q(t)$ and $b(s)\ne b(t)$. Under independence the weight of the states with $q=q(s)$ and $b=b(t)$ is the product of two positive weights, so some $u\in X$ has $q(u)=q(s)$ and $b(u)=b(t)$, and since $q$ fixes $b$ across $X$, $b(t)=b(u)=b(s)$, which is false.
+\end{proof}
+\inlean{\lean{Response.as_far_as}.}
+
+The first part is ``only as far as'': the response carries no more about $q$ than what it passes through does, and any measure of dependence that does not grow under a map serves in place of $I_\mu$. The second is the case of nothing, the book's ``Age would stop telling it anything about corrosion''. The third says that Eq.~\eqref{eq:borrowing} holds as proved, and the claim's first clause under either reading, since what it proves of $b$, being fixed by $q$ and varying with it, is the stronger. Where an equivalence needs the stronger relation, it is written ``moves with exactly'', as the book's Section~3.2 writes ``moves with worth exactly''.
+
+\entry{claim:designs-that-cannot-run}{proved}{\lean{Response.design_cannot_run}, \lean{Response.requirement_can_be_written}, \lean{Response.runs_on_what_it_keeps}}
+Read a requirement as a quantity $q$ a process is to respond to across $X$, and ``as written'' as a response that tells apart whatever $q$ tells apart there. Let $s,t\in X$ have $G(s)=G(t)$ and $q(s)\ne q(t)$, which is what ``no description it acts through keeps'' comes to. Then:
+\begin{equation}\label{eq:design}
+  \begin{gathered}
+  \text{for every rule }r':\ \ \neg\ \forall u,v\in X:\ q(u)\ne q(v)\Rightarrow r'(G(u))\ne r'(G(v));\\
+  \text{for every rule }r'\text{ and every }Y\subseteq S:\ \ r'\circ G\text{ is constant on }Y\ \text{ or }\ P^{r'}\text{ holds }r'\circ G\text{ across }Y.
+  \end{gathered}
+\end{equation}
+The first line is ``cannot operate as written''. The second is ``in operation it responds to something its descriptions do keep, or to nothing'', with the constant response as nothing and the response itself as what is kept. It holds of every process, with no requirement in view. And the requirement can be written: wherever $G$ identifies two distinct states, the marker of one of them is a quantity $G$ does not carry.
+
+\begin{proof}
+At $s,t$ the first line's hypothesis would give $r'(G(s))\ne r'(G(t))$, and $G(s)=G(t)$. For the second line, if $r'\circ G$ is not constant on $Y$ then it varies with itself at two states of $Y$, it fixes itself, and $G$ carries it. For the last sentence, if $q=h\circ G$ with $q(x)$ the statement $x=s$, and $G(s)=G(t)$, then $t=s$.
+\end{proof}
+
+What may stand in for $q$ on a smaller set is \itemref{claim:borrowing}: across a set where a carried quantity moves with $q$ exactly, a response can follow $q$, and it does so through that quantity. Eq.~\eqref{eq:design} is the case where the two states are both accessible.
+
+\entry{claim:not-supplied-from-outside}{proved}{\lean{Response.told}, \lean{Response.unsupplied}, \lean{exists_takeUp_iff}, \lean{Response.told_holds_within}}
+Telling a party more reads as the process coming to make one more map of its constitutive values. Write $P^{f}$ for $P$ with one more further map $f:C\to V$ under its old rule. For every $f$,
+\begin{equation}\label{eq:told}
+  \ker c_{P^f}=\ker c,\qquad a_{P^f}=a,
+\end{equation}
+so what the process is constituted to tell apart stays, and while its rule stays, its response does, and so does whatever that response follows. Another's coarse-graining supplies nothing besides: for a coarse-graining $g'$ another process makes, a map $h$ on its values, any rule $r'$ on the values of $P^f$, and any $e:S\to E$ with a map $h'$ on $E$,
+\begin{equation}\label{eq:unsupplied}
+  \begin{gathered}
+  f\circ c=h\circ g'\ \Longrightarrow\ \ker c\subseteq\ker(h\circ g')\cap\ker(r'\circ G_{P^f}),\\
+  \bigl(\exists f:\ f\circ c=h'\circ e\bigr)\iff\ker c\subseteq\ker(h'\circ e).
+  \end{gathered}
+\end{equation}
+What is taken up separates nothing the taker was not constituted to tell apart, and whether another's map can reach it at all is settled by the constitution it already has.
+
+\begin{proof}
+$P^f$ has the same $c$, and its rule ignores the new value. By Eq.~\eqref{eq:law-constitution} applied to $P^f$, $\ker c\subseteq\ker(f\circ c)=\ker(h\circ g')$, and by \itemref{claim:silence} applied to $P^f$ under $r'$, $\ker c$ lies in the kernel of its response. The equivalence is the kernel criterion, Eq.~\eqref{eq:criterion}, for $c$ and $h'\circ e$.
+\end{proof}
+
+The claim's last words, ``not which losses can reach it'', read as the losses its constitution carries, and telling adds none.
+
+\begin{lemma}\label{lem:told-reaches}
+For every process $P$, every further map $f$, every $q$ and every $X$: if $P^f$ holds $q$ across $X$, then $c\rhd q$.
+\end{lemma}
+\begin{proof}
+Holding gives $G_{P^f}\rhd q$, and $c\rhd G_{P^f}$ by Eq.~\eqref{eq:law-constitution}.
+\end{proof}
+\inlean{\lean{Response.told_holds_within}.}
+
+Among those losses, what is held can still change, since holding asks that what the process makes carry the quantity: making one more map can turn a borrowing into a holding with the response unmoved.
+
+\begin{lemma}\label{lem:told-holding}
+On two bits, let $P$ be constituted to read both, make the first and respond with it. Across the states where the bits agree, $P$ does not hold the second bit and $P^{f}$ does, for $f$ the second bit.
+\end{lemma}
+\begin{proof}
+$P$ does not carry the second bit, as $(0,0)$ and $(0,1)$ show; $P^f$ does. Across those states the response equals the second bit, before and after.
+\end{proof}
+\inlean{\lean{Response.told_can_change_holding}.}
+
+And a rule that uses what is told makes the response move: on the same two bits, the rule returning the new map comes to follow the second bit across all four states, which $P$ does not (\lean{Response.told_and_acting_follows}). So the claim's last sentence is proved as worded: reports, data and attributes change what is available to a party, and the losses that can reach it are those its constitution already carries.
+
+\entry{claim:between}{proved}{\lean{Composition.between}, \lean{between_nonempty_iff}; \script{compute_exact.py}}
+For every arrangement $A$ and every position $i$,
+\begin{equation}\label{eq:between-result}
+  \begin{gathered}
+  B(A)\subseteq\ker a_i,\\
+  B(A)\ne\emptyset\iff\hat c\text{ is not injective},\\
+  \ker c_i\setminus\Delta\ne\emptyset\ \iff\ \exists I'\text{ finite},\ A'\text{ over }I',\ i'\in I':\ P'_{i'}=P_i\ \text{ and }\ B(A')\ne B(A).
+  \end{gathered}
+\end{equation}
+The first line is the claim's second sentence: no response tells apart two states that differ only in what lies between. The responses in it are those at the arrangement's own level, and that restriction has force once arrangements nest, since a process further in can respond to a pair in the between further out (\lean{nested_response_separates}).
+
+The second line is what is proved of the claim's first sentence. Some differences are registered by none of the parties unless what they register together tells every two states apart, and an arrangement holding a process that reads the whole state has an empty between. The book states the premise before the claim, that no set of real parties together registers every difference in the world, for the reason no description does (\itemref{claim:silence}). Under it $\hat c$ is not injective, and the second line gives the claim's first sentence. A counted world, such as the book's Section~8.2 counts, can be told apart whole.
+
+The third line is ``they belong to the arrangement, not to any party'': hold one process fixed and vary what stands beside it, and the between moves, unless that process tells every two states apart, in which case the between is empty in every arrangement that holds it.
+
+\begin{proof}
+A pair of $B(A)$ lies in $\ker c_i$, and $\ker c_i\subseteq\ker a_i$ by \itemref{claim:silence}. For the second line, $\{s,t\}$ with $s\ne t$ lies in $B(A)$ if and only if $\hat c(s)=\hat c(t)$. For the third, let $z\in\ker c_i\setminus\Delta$. If $z\in B(A)$, set $P_i$ beside $\readop(\id_S)$, whose kernel is the diagonal, and $z$ leaves the between. If $z\notin B(A)$, let $P_i$ stand alone, and $z$ enters it. Conversely, if $\ker c_i$ holds only the diagonal then every arrangement holding $P_i$ has an empty between, and so all of them have one between.
+\end{proof}
+
+The same holds with the positions fixed, given a second position: \lean{exists_between_ne_iff}. The between of $A$ may be empty in the third line (\lean{exists_between_ne_of_empty}). On the bridge the $\nBridgeBetween$ pairs that differ only in corrosion are the between of the two offices.
+
+Eq.~\eqref{eq:between} is the kernel of the joint map less the diagonal, an old intersection. Off the diagonal, it is Pawlak's indiscernibility relation of a set of attributes~\cite{Pawlak1982}. Halpern and Moses meet it as implicit knowledge, since called distributed knowledge, where the points a group cannot distinguish are the intersection of the sets its members cannot~\cite{HalpernMoses1990}. In Aumann's terms it is the join of the partitions, their coarsest common refinement, and his common knowledge reads the other lattice operation, their finest common coarsening~\cite{Aumann1976}. The entries below concern the responses built on it and the way it moves.
+
+\entry{definition:holding-loss}{definition}{\lean{Process.Holds}, \lean{Follows}}
+A party holds a loss when its process holds a quantity, as Eq.~\eqref{eq:follow} and the sentence after it define: $G\rhd q$, $q\rhd_Xa$ and $a\bowtie_Xq$. ``The loss, registered'' is the first condition, and ``changes what the party does'' is the other two, read across the accessible states. Holding has no sign, since no order on either set of values enters. Which quantities are losses is the reading's, and a proof uses only that a quantity is held. On the bridge, the budget office read as $\readop(s\mapsto s_2)$ holds funding across all the states, and holds nothing about the cable.
+
+\entry{claim:persistence}{proved}{\lean{Persistence.lapse}, \lean{Upkeep.occasions_iff_held}, \lean{Upkeep.held_of_kept}, \lean{lasts_without_range}, \lean{lasts_without_occasion}, \lean{Persistence.value_not_held}, \lean{Persistence.chain}; \script{compute_sieve.py}, \script{compute_law.py}}
+Read what the claim speaks of as a keeping, ``persists indefinitely'' as kept at every step of a course that runs it, and ``its lapse tied to a loss some party holds'' as its lapse held. For every keeping $K$, every $X$, and every course $x$ that runs $K$ and meets the premise, Eq.~\eqref{eq:premise},
+\begin{equation}\label{eq:persistence}
+  \bigl(k(x_t)\ \text{ for all }t\bigr)\ \Longrightarrow\ K\text{'s lapse is held across }X.
+\end{equation}
+The condition of response does not give this by itself, as the book's Section~2.4 says. Given the run, the first clause and that $K$ is kept throughout, the second clause is equivalent to the conclusion (\lean{Upkeep.occasions_iff_held}). So Eq.~\eqref{eq:persistence} is the second clause, read along a course that takes every value and stays kept, which is the statement Section~2.4 describes. Claims 13, 15, 20, 31, 32, 33, 37 and 42 rest on it and have that force.
+
+The claim's ``some party'' reads as a process whose response reaches the decision, itself or through a join, and ``tied'' as the decision's reading what the process at the decision responds. A process whose response does not reach the decision can hold $k$, and that keeps nothing.
+
+\begin{proof}
+If the lapse is not held, the second clause gives a kept $s\in X$ at which the decision does not keep it. The first gives a step $t$ at which the deciding responses are those at $s$, and the decision reads nothing else, so it does not keep it at $x_t$. Then $k(x_{t+1})$ fails, by Eq.~\eqref{eq:runs}.
+\end{proof}
+
+The proof nowhere uses that the product is a prevented failure, and the statement holds of any upkeep, and at what a cut reads, by instantiation (\lean{Persistence.at_cut}). That condition is why the claim speaks of the lapse.
+
+\begin{lemma}\label{lem:value-not-held}
+For a keeping with product $F$, no process holds $F$ across any set of situations, and some two situations with one state that obtains give $F$ two values and the decision one.
+\end{lemma}
+\begin{proof}
+The first is Eq.~\eqref{eq:nonevent} at \itemref{claim:non-event}. For the second, $\mathrm{dep}(F)$ gives the two situations, and the decision reads the state that obtains.
+\end{proof}
+\inlean{\lean{Persistence.value_not_held}, \lean{Persistence.decision_reads_no_value}.}
+
+So a holder of the lapse holds something other than the value. What Lemma~\ref{lem:value-not-held} rules out is a decision resting on what the keeping prevents, which is where a capacity with a registered gain differs, by \itemref{claim:what-gets-built}.
+
+Whether it is kept and whether the step is tight give four states. Let one process read whether the step is tight, and another whether it is kept. The next lemma shows Eq.~\eqref{eq:persistence} at work on them, with both of its sides met.
+
+\begin{lemma}\label{lem:persistence-at-work}
+Let every state be accessible. Deciding by both processes, where a tight step keeps it only if the second responds to its being kept, the premise is met along a course that stays kept and takes both kinds of step, and the lapse is held. Deciding by the first alone, no deciding process holds the lapse, the second clause gives the tight step, and every course that runs it and meets the premise cuts it, and it stays cut. And deciding by both, with a decision that asks that the second respond to its being kept and that the step be calm, the lapse is held, the premise is met, and a tight step still cuts it.
+\end{lemma}
+\begin{proof}
+The second process reads whether it is kept, so it carries that and responds with it. In a tight step the first case keeps it and the second does not, by the rule. Two kept states differing in whether the step is tight give the first process two responses, so whether it is kept does not fix its response.
+\end{proof}
+\inlean{\lean{Persistence.occurs}, \lean{Persistence.cuts_unheld}, \lean{held_can_be_cut}.}
+
+The third case is why the claim says ``only where'': the theorem says that what lasts was held, and nothing of what is held. The tie excludes a padded case: a standing order with an idle reader among its deciding positions has a deciding process holding $k$ and a decision that reads no response, so its lapse is not held, and the second clause fails (\lean{standing_order_not_held}). Each clause of the premise does work, and a span must be indefinite.
+
+\begin{lemma}\label{lem:clauses}
+On those states, with no deciding process holding the lapse: a course with no tight step keeps it at every step, with the second clause met and the first not; a rule that keeps it whatever the responses do keeps it at every step of a course taking both kinds of step, with the first met and the second not; and for every $n$, a course meets the whole premise and keeps it through step $n$, and it is cut by step $n+2$.
+\end{lemma}
+\begin{proof}
+Each is a calculation with Eq.~\eqref{eq:runs}. The last course is calm through step $n$ and tight after.
+\end{proof}
+\inlean{\lean{lasts_without_range}, \lean{lasts_without_occasion}, \lean{lasts_any_finite_span}.}
+
+The first clause reads the states where $K$ is kept because a deciding response that follows $k$ has another value where it has lapsed.
+
+\begin{lemma}\label{lem:kept-states}
+If $x_t\in X$ and $k(x_t)$ for all $t$, and the lapse is held across $X$, then some $s\in X$ has deciding responses the course never takes.
+\end{lemma}
+\begin{proof}
+Some deciding process's response follows $k$ across $X$: a holder's at the decision, or one that follows a holder's through a join (\lean{Upkeep.LapseHeld.decidingFollows}). So it takes one value at every kept state of $X$ and another at some lapsed one.
+\end{proof}
+\inlean{\lean{not_ranges_over_lapsed}.}
+
+Over every accessible state the first clause would therefore leave no lapse held along a course inside them that stays kept, and with the second clause no keeping could stay kept along such a course, held or not. \script{compute_sieve.py} runs capacities through tight years: its head states the rule by which an unheld one is cut. \script{compute_law.py} writes the book's Table~5.1 from the six things law set out to secure, coded from their sources, and checks that whether a party holds the lapse sorts all five.
+
+The book's Section~2.4 reads a chain of holding: each part is kept by whoever would lose what it produces, so the chain lasts no longer than its first part that only prevents and that no one holds. Read ``kept by whoever would lose what it produces'' as held in the sense of \itemref{definition:holding-loss}, and each later part's lapse as held only across the states at which the part before it is kept.
+
+\begin{lemma}[Chain]\label{lem:chain}
+Let $K_1,\dots,K_n$ be upkeeps along one course. Let $K_1$ meet the premise on $X$ with its lapse not held across $X$, and for $j\ge2$ let $K_j$'s lapse not be held across the states at which $K_{j-1}$ has lapsed, with $K_j$ meeting the premise there along the course from any step on which $K_{j-1}$ stays lapsed. Then each $K_j$ is cut at some step and stays cut.
+\end{lemma}
+\begin{proof}
+Induct on $j$. $K_1$ is cut at some step by Eq.~\eqref{eq:persistence} and stays cut by Eq.~\eqref{eq:runs}. From the step on which $K_{j-1}$ stays cut, $K_j$ runs across states at which its lapse is not held and the premise is met, so Eq.~\eqref{eq:persistence} applied to the rest of the course cuts it.
+\end{proof}
+\inlean{\lean{Persistence.chain}.}
+
+The book's paragraph identifies the agency and the budget procedure as such parts, and claims nothing general from registering.
+
+\entry{claim:change-by-refinement}{proved}{\lean{Composition.leaves_iff}, \lean{Composition.payer}, \lean{Composition.balance}; \script{compute_toy.py}, \script{compute_drift.py}, \script{compute_exact.py}}
+For every change $\Theta=(A,A',X,X')$, with $B=B(A)$ and $B'=B(A')$, and every $z\in B$,
+\begin{equation}\label{eq:refinement}
+  \begin{gathered}
+  z\notin B'\iff\exists i:\ z\in\pi_i(\Theta),\\
+  B\setminus B'\subseteq\bigcup_i\pi_i(\Theta),\qquad |B|\le|B'|+\sum_i|\pi_i(\Theta)|.
+  \end{gathered}
+\end{equation}
+The first line is ``shrinks where some party comes to register it'', in both directions: a pair leaves when some process comes to tell it apart, and in no other way. The second is ``by no more than is paid'', as sets and as a count. The count sums over positions because a price is paid at each one, so the inclusion is the sharper statement.
+
+\begin{proof}
+Let $z\in B\setminus B'$. Then $z\notin\Delta$, and $z\notin B'$ gives some $i$ with $z\notin\ker c_i'$, while $z\in B$ gives $z\in\ker c_i$, so $z\in\pi_i(\Theta)$. Conversely $z\in\pi_i(\Theta)$ gives $z\notin\ker c_i'$, so $z\notin B'$. The count follows from $B\subseteq B'\cup\bigcup_i\pi_i(\Theta)$, since the size of a union is at most the sum of the sizes.
+\end{proof}
+
+The same argument with the arrangements exchanged bounds growth by the release, and \itemref{claim:drift-has-direction} uses it:
+\begin{equation}\label{eq:balance}
+  B'\setminus B\subseteq\bigcup_i\rho_i(\Theta),\qquad|B'|\le|B|+\sum_i|\rho_i(\Theta)|.
+\end{equation}
+No law is used, since Eqs.~\eqref{eq:refinement} and~\eqref{eq:balance} are facts about sets.
+
+Give the bridge's inspection unit ultrasound, so that it reads $(s_1,s_3)$. It comes to tell apart $\nRefinementPrice$ pairs, the price, and the between falls from $\nBridgeBetween$ pairs to none. The other $\nPriceToldElsewhere$ pairs paid for were pairs the budget office already told apart. Over every pair of registers on $\nExactStates$ states, \script{compute_exact.py} finds that the cheapest refinement carrying all of the between never costs less than it carries, and costs that in $\nExactAtPrice$ of the $\nExactWithBetween$ arrangements with something between them, $\nExactAtPriceShare$ per cent. In the rest it costs at most $\nExactLargestExcess$ pairs more. In each cheapest one, the excess is exactly the pairs one party pays to tell apart that the other already told apart, with any pair both pay for counted again, which the script checks by assertion; so in a cheapest one that pays for no pair twice, it is the pairs already told apart, as the book's Section~8.2 says.
+
+\entry{claim:change-by-attachment}{proved}{\lean{responseOnly_ofRule}, \lean{attachment_leaves_between}, \lean{Composition.act_over_lumped}, \lean{Composition.cost_of_between}, \lean{cost_occurs}}
+Read a response changed where what its party registers has not changed as a change of rules: one position's rule is new, and every process keeps every coarse-graining it makes, so every constitution stays (\lean{responseOnly_ofRule}). Read an act as a rule with two values, to act and not to act, and a difference to be carried as a \emph{need}, a set $N\subseteq S$ of the states at which the act is called for. A rule meets $N$ when it acts at every state of $N$. A process \emph{lumps together} two states when $G$ takes one value at both. Write $L(N)$ for the states it lumps together with some state of $N$, and $\mathrm{act}_X(h)$ for the states of $X$ at which $P^h$ acts.
+
+Let $A'$ be a change of rules from an arrangement $A$. Then $B(A')=B(A)$, and every price and release is empty. Let $P$ be a process, $X\subseteq S$ and $N\subseteq S$, and let $h^*$ be the rule that acts where $G$ takes a value it takes on $N$, which meets $N$. For every rule $h$ that meets $N$,
+\begin{equation}\label{eq:act-over-lumped}
+  (L(N)\cap X)\setminus N\ \subseteq\ \mathrm{act}_X(h)\setminus N,\qquad \mathrm{act}_X(h^*)\setminus N=(L(N)\cap X)\setminus N.
+\end{equation}
+So a rule carries a difference only as an act over the whole of what its process lumps together. Its cost, the act where it was not needed, takes in every accessible state lumped with $N$ and outside it, and under $h^*$ nothing else. Where a pair $\{s,t\}$ of $B(A)$ has $s\in N$ and $t\in X\setminus N$, $t$ lies in that cost at every position $i$, in $(L_i(N)\cap X)\setminus N$.
+
+\begin{proof}
+A change of rules leaves each constitution, so $\ker c_i'=\ker c_i$ for all $i$, and Eqs.~\eqref{eq:between} and~\eqref{eq:price} give the first sentence. Let $t\in X\setminus N$ with $G(t)=G(s)$ for some $s\in N$. The response of $P^h$ is $h\circ G$, so it acts at $t$ as it does at $s$, where $h$ meets $N$. And $h^*$ acts at $t$ exactly where $t\in L(N)$. For the last sentence, $\{s,t\}\in B(A)$ gives $\{s,t\}\in\ker c_i\subseteq\ker G_i$ at every position $i$, so $t\in L_i(N)$.
+\end{proof}
+\inlean{\lean{attachment_leaves_between}, \lean{Composition.act_over_lumped}, \lean{Composition.cost_of_between}.}
+
+The case occurs. On two bits, a process reads the first with a constant rule, and across the states where the bits agree, the second bit fixes the first and the first varies with it. The rule comes to give the first bit: the response changes, from not following the second bit to following it, and the between stays (\lean{attachment_occurs}). The cost occurs as well. On two bits, the second set only where the first is, a process reads the first, and the need is the second bit. The act that meets it is taken at the state with only the first bit set, where it was not needed (\lean{cost_occurs}). Read the first bit as a cable's age and the second as corrosion inside it, and this is the book's bridge office replacing an old cable that had not corroded.
+
+Where the difference is a quantity, the change can make the response follow it. Let $A$ be an arrangement, $i$ a position, $X\subseteq S$, and $q$ a quantity separating some pair of $B(A)$. Then $G_i\not\rhd q$, and these are equivalent:
+\begin{equation}\label{eq:attachment}
+  \begin{gathered}
+  \exists r':\quad q\rhd_X(r'\circ G_i)\quad\text{and}\quad(r'\circ G_i)\bowtie_Xq;\\
+  \exists b:\quad G_i\rhd b,\quad q\rhd_Xb,\quad b\bowtie_Xq.
+  \end{gathered}
+\end{equation}
+So a response can come to follow a difference between parties with what every party registers standing as it was, exactly where a carried quantity moves with that difference exactly across $X$. The claim's difference is carried by the act that meets it. In this paper's sense the quantity stays uncarried throughout, since a carried quantity would identify the pair it separates.
+
+\begin{proof}
+Let $z\in B(A)$ be separated by $q$. If $G_i$ carried $q$, then $z\in\ker c_i\subseteq\ker G_i\subseteq\ker q$, which is false. If the first line holds, the new response is such a $b$, by Eq.~\eqref{eq:law-factorization}. If the second holds, write $b=h\circ G_i$ and give position $i$ the rule $h$.
+\end{proof}
+\inlean{\lean{Composition.attachment}.}
+
+The book's Section~2 makes such a change by tying what was missed to a loss someone already holds. The next lemma is that tie.
+
+\begin{lemma}\label{lem:tied}
+If $P$ holds $\ell$ across $X$ and $q\rhd_X\ell$, then $a$ follows $q$ across $X$. And if $b=h\circ G$ varies with any quantity across $X$, then $P^h$ holds $b$ across $X$.
+\end{lemma}
+\begin{proof}
+Across $X$, $q$ fixes $\ell$ and $\ell$ fixes $a$, so $q$ fixes $a$. Holding $\ell$ gives $s,t\in X$ with $\ell(s)\ne\ell(t)$ and $a(s)\ne a(t)$, and $\ell(s)\ne\ell(t)$ gives $q(s)\ne q(t)$. For the second sentence, the response of $P^h$ is $b$, which $G$ carries and which follows itself where it takes two values.
+\end{proof}
+\inlean{\lean{Composition.tied_to_held}, \lean{Composition.attached_holds}.}
+
+\entry{claim:what-lasts-is-what-was-held}{proved}{\lean{Persistence.what_lasts}, \lean{Persistence.lasts_alike}, \lean{Persistence.not_most_valuable}; \script{compute_sieve.py}}
+Read the capacities a society keeps as a family of keepings along one course, and ``through the years in which they were not needed'' as that course, each under the premise. For every family $(K_j)$, sets $(X_j)$ and course $x$ that runs each and meets its premise,
+\begin{equation}\label{eq:what-lasts}
+  \bigl(k_j(x_t)\ \text{ for all }t\bigr)\ \Longrightarrow\ K_j\text{'s lapse is held across }X_j,
+\end{equation}
+which is ``are those whose lapse someone held'', in the one direction the words carry and with the strength of \itemref{claim:persistence}. A lapse that is held can still be cut, by Lemma~\ref{lem:persistence-at-work}. The rest of the claim is that worth does not sort them.
+
+\begin{lemma}\label{lem:lasts-alike}
+Two upkeeps along one course, alike at the first step and alike in their decision at each step, are alike at every step, whatever each is worth.
+\end{lemma}
+\begin{proof}
+By induction on the step, with Eq.~\eqref{eq:runs} for each.
+\end{proof}
+\inlean{\lean{Persistence.lasts_alike}.}
+
+The definition of a course's run has the decision read responses and nothing else, so Lemma~\ref{lem:lasts-alike} holds by that definition, and the reason the definition is the right one is Lemma~\ref{lem:value-not-held}: what a keeping prevents does not reach what decides it. Something it registers can move with worth, and then worth counts through that, by \itemref{claim:borrowing}. And a keeping can be worth more and go first.
+
+\begin{lemma}\label{lem:not-most-valuable}
+On three bits and one course, each keeping under the premise with every state accessible, one worth nine collapses that no deciding process holds is cut, and one worth a single collapse, at no situation worth more than the first, is held and stays kept at every step.
+\end{lemma}
+\begin{proof}
+One process reads whether the step is tight, and another whether the second keeping is kept. A tight step cuts the first, as in Lemma~\ref{lem:persistence-at-work}, and the second keeps it. A collapse that would have come is read at what would have obtained, so both products depend on a forestalled state.
+\end{proof}
+\inlean{\lean{Persistence.not_most_valuable}.}
+
+\script{compute_sieve.py} asserts the same pair year by year, and shows the shape over a population.
+
+\modelentry{model:sieve}{S}{The sieve as a survival model}{proved}{\lean{Sieve.survival}, \lean{Sieve.years_kept}, \lean{Sieve.hazard}, \lean{Sieve.survivors_worth}, \lean{Sieve.worth_independent}; \script{compute_sieve_chain.py}}{The first writes the sieve of Section~3.2 as three states, held, unheld and cut, with constant yearly chances of a tight year, of a cut in it and of a holder moving on.}
+The model's rules are stated at the head of \script{compute_sieve_chain.py}. Write $p$ for the chance that a year is tight, $\ell$ for the chance that a holder moves on, and $u$ and $v$ for the chances that a tight year cuts an unheld and a held capacity. Put
+\begin{equation}\label{eq:sieve-rates}
+  h_0=pu,\qquad h_1=pv,\qquad\sigma_H=(1-h_1)(1-\ell),\qquad\sigma_U=1-h_0,\qquad\eta=(1-h_1)\,\ell.
+\end{equation}
+On the states held, unheld and cut, in that order, one year is the matrix
+\begin{equation}\label{eq:sieve-step}
+  \begin{pmatrix}\sigma_H&\eta&h_1\\0&\sigma_U&h_0\\0&0&1\end{pmatrix},
+\end{equation}
+with cut absorbing, as a lapse stays a lapse along a course that runs it, Eq.~\eqref{eq:runs}. The script takes $p=\nSieveP$ and $\ell=\nSieveQ$ from the sieve the book runs, and sets $u=\nSieveU$ and $v=\nSieveV$ so that after $\nSieveTargetYear$ years $\nSieveTargetUnheld$ per cent of unheld capacities and $\nSieveTargetHeld$ per cent of held ones remain, the endpoints the book prints from \script{compute_sieve.py}. That script draws a cut chance for each capacity, so its curves are not these.
+
+\begin{lemma}[Survival]\label{lem:sieve-survival}
+For every $t\ge0$ and $\sigma_H\ne\sigma_U$, the shares still kept after $t$ years are
+\[
+S_U(t)=\sigma_U^{\,t},\qquad S_H(t)=\sigma_H^{\,t}+\frac{\eta}{\sigma_H-\sigma_U}\bigl(\sigma_H^{\,t}-\sigma_U^{\,t}\bigr).
+\]
+\end{lemma}
+\begin{proof}
+A capacity held at the start is still held after $t$ years with chance $\sigma_H^t$. The share unheld after $t+1$ years is $\eta\,\sigma_H^t$, those that pass, plus $\sigma_U$ times the share unheld after $t$, and the closed form meets this recursion and starts at $0$.
+\end{proof}
+\inlean{\lean{Sieve.survival}, with $\sigma_H$, $\sigma_U$ and $\eta$ as $a$, $b$ and $e$.}
+
+The script checks the closed form against the chain stepped in exact rational arithmetic for every $t\le\nSieveExactYears$, and against a simulation of the rules. The shares halve after $\nSieveHalfLifeUnheld$ years unheld and $\nSieveHalfLifeHeld$ years held.
+
+\begin{lemma}[Years kept]\label{lem:sieve-years}
+For $0\le\sigma_H,\sigma_U<1$ and $\sigma_H\ne\sigma_U$, the expected numbers of years kept, $\sum_{t\ge1}S(t)$, are
+\[
+E[L_U]=\frac{\sigma_U}{1-\sigma_U},\qquad E[L_H]=\frac{\sigma_H}{1-\sigma_H}+\frac{\eta}{(1-\sigma_H)(1-\sigma_U)}.
+\]
+\end{lemma}
+\begin{proof}
+Sum the geometric series of Lemma~\ref{lem:sieve-survival}.
+\end{proof}
+\inlean{\lean{Sieve.years_kept}.}
+
+These are $\nSieveLifeUnheld$ and $\nSieveLifeHeld$ years, a ratio of $\nSieveLifeRatio$. Where $h_1$ is far below $\ell$, $E[L_H]\approx1/\ell+1/h_0$: a held capacity lasts as long as its holder stays, and then one wait for a tight year that finds it unheld. Here $h_1$ is about half of $\ell$, and that shortcut would give $\nSieveLifeShortcut$ years.
+
+\begin{lemma}[Long-run hazard]\label{lem:sieve-hazard}
+The yearly hazard $1-S_H(t+1)/S_H(t)$ of the capacities held at the start is $h_1$ at $t=0$, and with $\sigma_H,\sigma_U,\eta>0$ and $\sigma_H\ne\sigma_U$ it tends to $1-\max(\sigma_H,\sigma_U)$.
+\end{lemma}
+\begin{proof}
+$S_H(1)=\sigma_H+\eta=1-h_1$. Write $S_H(t)=(1+\gamma)\sigma_H^t-\gamma\,\sigma_U^t$ with $\gamma=\eta/(\sigma_H-\sigma_U)$. Divide by the power of the larger of $\sigma_H$ and $\sigma_U$: the smaller's ratio to it tends to $0$, and the larger's coefficient, $1+\gamma$ or $-\gamma$, is positive, so $S_H(t+1)/S_H(t)$ tends to the larger.
+\end{proof}
+\inlean{\lean{Sieve.hazard}.}
+
+The hazard is $\nSieveHazardStart$ in the first year and $\nSieveHazardYearThirty$ in the thirtieth, and tends to $\nSieveHazardLimit$. Where $h_0>\ell+h_1$ the limit $1-\sigma_H$ is about $\ell+h_1$: in the long run, holders leaving, not the budget, sets the rate at which held capacities are lost.
+
+Read for one capacity, the rules give the jump at departure: its chance of a cut in a year is $h_1$ while it is held and $h_0$ from the year after its holder leaves, a factor of $u/v=\nSieveJump$. It is the shape of the model to look for around the departures of real sponsors and officials.
+
+\begin{lemma}[Survivors' worth]\label{lem:sieve-worth}
+Over a finite weighting of capacities, where the chance that one is kept after $t$ years is a function $S(t\mid s)$ of its registered signal $s$,
+\[
+E[w\mid\text{kept}]-E[w]=\frac{\operatorname{Cov}\bigl(w,S(t\mid s)\bigr)}{E\bigl[S(t\mid s)\bigr]},
+\]
+and where worth and the signal are weighted apart, as a product, the mean worth of those kept is that of all.
+\end{lemma}
+\begin{proof}
+Worth enters survival only through $s$, so the weight of worth among those kept is $E[w\,S(t\mid s)]$; divide by $E[S(t\mid s)]$, the chance of being kept, and subtract $E[w]$. Under a product weighting, $E[w\,S(t\mid s)]$ is $E[w]\,E[S(t\mid s)]$.
+\end{proof}
+\inlean{\lean{Sieve.survivors_worth}, \lean{Sieve.worth_independent}.}
+
+The lemma is the selection term of Price's equation~\cite{Price1970}, and its last part is \itemref{claim:borrowing} at work: worth counts only through what is registered. The script's rule~R4 lets a tight year cut an unheld capacity at a chance that falls with a signal moving with worth, and reads it over a fine grid of signals, a finite weighting. With the signal's normal score at correlation $0.5$ with worth's, the mean worth of the unheld capacities kept after $\nSieveTargetYear$ years is $\nSieveWorthHalf$, against $0.5$ for all.
+
+Three states are an exact reading of the richer chain the script builds, which records each holder's years served. With a constant chance of leaving it lumps onto held, unheld and cut~\cite{KemenySnell1960}, in $\nSieveLumpMemoryless$ classes, and with a chance that falls with years served it keeps $\nSieveLumpTenure$.
+
+In units of $1/h_0$, every curve depends on two ratios, $\kappa=\ell/h_0=\nSieveKappa$ and $\varepsilon=h_1/h_0=v/u=\nSieveEpsilon$. In continuous time, with holders leaving at rate $\kappa$ and cuts at rate $\varepsilon$ held and $1$ unheld, the shares held and unheld solve $H'=-(\kappa+\varepsilon)H$ and $U'=\kappa H-U$ from $H=1$ and $U=0$, so $S_U(\tau)=e^{-\tau}$ and
+\[
+S_H(\tau)=e^{-(\kappa+\varepsilon)\tau}+\frac{\kappa}{1-\kappa-\varepsilon}\bigl(e^{-(\kappa+\varepsilon)\tau}-e^{-\tau}\bigr),
+\]
+and held capacities outlast unheld ones by $(1+\kappa)/(\kappa+\varepsilon)=\nSieveRatioContinuous$ in mean lifespan.
+
+The model does not say that real tight years or tenures are memoryless, or that any real capacity has these rates. Its rates are given; a reading of a record would estimate them, a question of identification, as the book's Section~10.4 says. A wrong rate leaves \itemref{claim:persistence} and \itemref{claim:what-lasts-is-what-was-held} standing.
+
+\entry{claim:what-is-kept}{proved}{\lean{Composition.kept_and_lost}, \lean{Composition.kept_along}, \lean{Composition.routes}, \lean{Response.borrowing}; \script{compute_purpose.py}}
+Read what an arrangement acts for as a quantity $q$, and ``as the world changes'' as a change of the world: one arrangement over two sets of accessible states, which compares the two and says nothing of how one becomes the other. The claim's first sentence is \itemref{claim:borrowing}, position by position: a response following a $q$ its process does not carry follows it through a carried quantity.
+
+For its second sentence, let the response at position $i$ tell apart across $X$ whatever $q$ tells apart there, and let the change bring into the accessible states $X'$ a pair $\{s,t\}\in B(A)$ with $q(s)\ne q(t)$, which is the world changing in what the parties drop. Then
+\begin{equation}\label{eq:kept}
+  \begin{gathered}
+  s,t\text{ were not both in }X;\\
+  B(A)\text{ stays, and every price and release of the change is empty};\\
+  \text{for every rule }r':\ \ \neg\ \forall u,v\in X':\ q(u)\ne q(v)\Rightarrow r'(G_i(u))\ne r'(G_i(v)).
+  \end{gathered}
+\end{equation}
+The second line is ``keeps what they register''. The third is ``loses what it acted for'', at the size this theorem gives: the position told apart what $q$ tells apart, and across the new states it does not, under any rule. That is all the theorem says is lost. Following in the weak sense of Eq.~\eqref{eq:follow} can survive such a change, wherever a carried quantity still moves with $q$ across $X'$, by Eq.~\eqref{eq:limit} at \itemref{claim:limit-not-problem}.
+
+\begin{proof}
+The pair lies in $\ker c_i\subseteq\ker G_i$, so $G_i(s)=G_i(t)$ and $a_i(s)=a_i(t)$, and with $q(s)\ne q(t)$ the hypothesis on $X$ rules out both lying in $X$. With $A=A'$ every set difference in Eq.~\eqref{eq:price} is empty, and Eq.~\eqref{eq:between} reads no accessible set. The third line is Eq.~\eqref{eq:design} at \itemref{claim:designs-that-cannot-run}.
+\end{proof}
+
+Following can be lost as well, and an example shows it; the theorem above does not. On two bits, a process reads the first and responds with it. Across the states where the bits agree its response tells apart what the second bit tells apart and follows the second bit, which it does not carry. Across all four states the arrangement is as it was, and under no rule does a response of that process follow the second bit, since $(0,0)$ and $(1,0)$ have one value of the second, so that any such response takes one value at both, and so everywhere (\lean{Composition.kept_and_lost_occurs}).
+
+The claim's ``unless'' names two ways out. The next lemma says what each case forces of a response that does follow $q$ after a change.
+
+\begin{lemma}\label{lem:routes}
+Let $\Theta$ be any change, $z\in B(A)$, $q$ a quantity separating $z$, and suppose $a_i'$ follows $q$ across $X$. Then one of these holds:
+\begin{enumerate}
+\item $z\notin B(A')$, and $z\in\pi_j(\Theta)$ for some $j$;
+\item $z\in B(A')$, $G_i'\not\rhd q$, and there is $b$ with $G_i'\rhd b$, $b\rhd a_i'$, $q\rhd_Xb$, $b\bowtie_Xq$ and $b\not\rhd q$.
+\end{enumerate}
+\end{lemma}
+\begin{proof}
+If $z\notin B(A')$, this is \itemref{claim:change-by-refinement}. If $z\in B(A')$, a quantity separating $z$ is carried by no $G_i'$, as at \itemref{claim:change-by-attachment}, and then Eq.~\eqref{eq:borrowing} at \itemref{claim:borrowing} gives $b$.
+\end{proof}
+\inlean{\lean{Composition.routes}.}
+
+So a response can follow what separates a pair of the between only by a price, or by borrowing. That $z$ has left or has not is excluded middle, and no theorem is needed to say so. The content is what each case forces: in the first, some position paid, and in the second, the process does not carry $q$. Case (1) is ``something comes to register the change''. Case (2) is where a tie to a held loss would land, and it does not name one: the response itself serves as its $b$. Lemma~\ref{lem:tied} of \itemref{claim:change-by-attachment} shows such a tie is enough. A course reads all of this at each step: where the accessible states move along it, and at a later step they hold a pair of the between that $q$ separates, the third line of Eq.~\eqref{eq:kept} holds at that step, of a response that told apart what $q$ tells apart at an earlier one (\lean{Composition.kept_along}). \script{compute_purpose.py} runs a register that drops each new kind of damage.
+
+\entry{claim:what-is-for}{proved}{\lean{Composition.what_is_for}, \lean{Composition.keeps_only_while_held}, \lean{Composition.what_is_for_occurs}; \script{compute_purpose.py}}
+Read what an arrangement is for as a quantity $q$, and keeping it as telling apart what $q$ tells apart, at the size \itemref{claim:what-is-kept} gives. Read a correction as the book's Section~3.3 does: a change of what is registered or held, made because the world moved, whose product is a purpose not lost. So it is a keeping $K$, of whichever arrangement decides it. Along a course $x$ let an arrangement $A_t$ stand at each step, changing only while $K$ is kept, so that $A_{t+1}=A_t$ wherever $K$ has lapsed at $t$, and let the accessible states $X_t$ move. Let the world go on moving where correction has stopped: where $K$ has lapsed at $n$, at some later step $m$ the states $X_m$ hold a pair of $B(A_n)$ that $q$ separates. Then under the premise on $K$ across $Y$, if $K$'s lapse is not held across $Y$, there is a step $n$ such that for each position $i$,
+\begin{equation}\label{eq:what-for}
+  \begin{gathered}
+  A_{n+m}=A_n\ \text{ for all }m;\\
+  \exists m\ge n\ \ \text{for every rule }r':\ \ \neg\ \forall u,v\in X_m:\ q(u)\ne q(v)\Rightarrow r'(G_i(u))\ne r'(G_i(v)).
+  \end{gathered}
+\end{equation}
+The first line is ``the arrangement continues'', and the second is ``what it was for does not''. So if at every step some rule of the arrangement standing there tells apart what $q$ tells apart, $K$'s lapse is held, which is ``only while''. The strength of this lies in the premise, read on the correction, and in the two hypotheses just named: if the world stops moving nothing more is lost, and if the arrangement goes on changing with $K$ lapsed, something else is correcting it.
+
+\begin{proof}
+By Eq.~\eqref{eq:persistence}, $K$ is cut at some step $n$, and by Eq.~\eqref{eq:runs} it stays cut, so the arrangement stays from $n$ on. The pair the world brings in lies in $\ker G_i$ for $G_i$ at $A_n$, and $q$ separates it, so the second line is Eq.~\eqref{eq:design} at \itemref{claim:designs-that-cannot-run}.
+\end{proof}
+
+\begin{lemma}\label{lem:for-occurs}
+On four bits, one world and one register, reading a bit that moves with what it is for until a step at which the two come apart. Where no deciding process holds the correction, the premise is met, it is cut, the register stays, and what it is for is lost. Where the correction is held it stays kept at every step, the register pays to read what it is for, and at every step it tells apart what that tells apart.
+\end{lemma}
+\begin{proof}
+The first case is Eq.~\eqref{eq:what-for}. In the second, the pair differing only in what it is for lies in the first register's between and outside the next's.
+\end{proof}
+\inlean{\lean{Composition.what_is_for_occurs}.}
+
+Following can outlast this, as at \itemref{claim:what-is-kept}, wherever something registered still moves with $q$. \script{compute_purpose.py} runs a register that drops each new kind of damage, with a correction held and not.
+
+\modelentry{model:adequacy}{A}{Adequacy for a purpose}{proved}{\lean{Adequacy.carried}, \lean{Adequacy.coarser_purpose}, \lean{Adequacy.borrowing}, \lean{Adequacy.no_recovery}, \lean{Adequacy.pooling}, \lean{Adequacy.world_moves}, \lean{Adequacy.price}, \lean{Adequacy.over_time_unheld}, \lean{Adequacy.over_time_held}; \script{compute_adequacy.py}}{The second is adequacy for a purpose, the share of states at which a register's reading settles what the arrangement is for: Pawlak's degree of dependency, taken over the states that occur.}
+Take finite states $S$, accessible states $X\subseteq S$, a coarse-graining $c$ read as a register, and a quantity $q$ read as what an arrangement is for. The \emph{class} of $x\in X$ is $\{y\in X:c(y)=c(x)\}$, and
+\begin{equation}\label{eq:adequacy}
+  R(c,q;X)=\{x\in X:\ \forall y\in X,\ c(y)=c(x)\Rightarrow q(y)=q(x)\},\qquad\alpha(c,q;X)=\frac{|R(c,q;X)|}{|X|},
+\end{equation}
+with $\alpha=1$ where $X$ is empty. $R$ is the \emph{adequacy region} and $\alpha$ the \emph{adequacy}; with weights on states, $\alpha$ is the weight of $R$ over that of $X$. A \emph{confusion} is a pair of distinct states of $X$ that $c$ identifies and $q$ separates, and a state of $X$ lies outside $R$ exactly when it belongs to one. An arrangement's adequacy is that of its registers read together, $\hat c(x)=(c_i(x))_i$. $\alpha$ is Pawlak's degree of dependency of $q$ on $c$ with $X$ for the universe, and $R$ his positive region~\cite{Pawlak1982,Pawlak1991}. The name is Parker's, from judging models by their fitness for a purpose~\cite{Parker2020}.
+
+\begin{lemma}[Adequate means carried]\label{lem:adequacy-carried}
+$\alpha(c,q;X)=1$ exactly when $c\rhd_Xq$, that is, when $c$ carries $q$ across $X$.
+\end{lemma}
+\begin{proof}
+$R=X$ says that $q$ is constant on every class, which is the kernel criterion, Eq.~\eqref{eq:criterion}, read across $X$.
+\end{proof}
+\inlean{\lean{Adequacy.carried}.}
+
+\begin{lemma}[Relative to the purpose]\label{lem:adequacy-purpose}
+For every map $f$, $R(c,q;X)\subseteq R(c,f\circ q;X)$: a register adequate for how safe a bridge is is adequate for whether it is safe, and not conversely.
+\end{lemma}
+\begin{proof}
+Where $q$ is constant on a class, so is $f\circ q$.
+\end{proof}
+\inlean{\lean{Adequacy.coarser_purpose}.}
+
+\begin{lemma}[Borrowing]\label{lem:adequacy-borrowing}
+For $Y\subseteq X$, $R(c,q;X)\cap Y\subseteq R(c,q;Y)$.
+\end{lemma}
+\begin{proof}
+Each class within $Y$ lies in the class within $X$.
+\end{proof}
+\inlean{\lean{Adequacy.borrowing}.}
+
+So a register can be adequate on a narrow world and not on a wide one, which is how something registered stands in for what is not, as at \itemref{claim:borrowing}. Age is adequate for corrosion over cables either new and sound or old and corroded, $\alpha=1$, and over all four kinds of cable it settles nothing, $\alpha=0$.
+
+\begin{lemma}[No recovery]\label{lem:adequacy-recovery}
+For every map $g$, $R(g\circ c,q;X)\subseteq R(c,q;X)$, so $\alpha$ can only fall along a chain of descriptions each built from the last.
+\end{lemma}
+\begin{proof}
+The classes of $c$ lie in those of $g\circ c$.
+\end{proof}
+\inlean{\lean{Adequacy.no_recovery}.}
+
+\begin{lemma}[Pooling, capped by the between]\label{lem:adequacy-pooling}
+For every party $i$, $R(c_i,q;X)\subseteq R(\hat c,q;X)$. A state $x\in X$ lies outside $R(\hat c,q;X)$ exactly when some $y\in X$ that no party tells from $x$ has $q(y)\ne q(x)$: a pair of the between, Eq.~\eqref{eq:between}, that $q$ separates.
+\end{lemma}
+\begin{proof}
+The classes of $\hat c$ lie in those of each $c_i$, and two states share a class of $\hat c$ exactly when no party tells them apart.
+\end{proof}
+\inlean{\lean{Adequacy.pooling}.}
+
+\begin{lemma}[The world moves]\label{lem:adequacy-world}
+For $X\subseteq X'$, $R(c,q;X')\cap X\subseteq R(c,q;X)$: with nothing in the arrangement changed, more accessible states can only take states out of the region.
+\end{lemma}
+\begin{proof}
+Lemma~\ref{lem:adequacy-borrowing}, with $X'$ for $X$ and $X$ for $Y$.
+\end{proof}
+\inlean{\lean{Adequacy.world_moves}.}
+
+The share $\alpha$ need not fall, since states that come to be accessible may arrive already settled: it rose in $\nAdequacyShareRose$ of the $\nAdequacyInstances$ instances the script widened. What the world's moving takes away is states, as \itemref{claim:what-is-kept} says of what an arrangement acted for.
+
+\begin{lemma}[The price of adequacy]\label{lem:adequacy-price}
+For every register $c'$ with $c'\rhd_Xq$, every confusion of $c$ in $X$ is a pair of $X$ that $c'$ tells apart and $c$ does not, so $c'$ pays at least their number. The register $(c,q)$, which comes to read the purpose beside $c$, pays exactly that.
+\end{lemma}
+\begin{proof}
+A confusion is separated by $q$, and $c'$ fixes $q$ across $X$, so $c'$ separates it. The pairs of $X$ that $(c,q)$ separates and $c$ does not are those $c$ identifies and $q$ separates.
+\end{proof}
+\inlean{\lean{Adequacy.price}.}
+
+With Lemma~\ref{lem:adequacy-pooling}, an arrangement's adequacy costs at least the pairs of its between within $X$ that the purpose separates: the price of \itemref{claim:change-by-refinement}, counted for one purpose. The script checks the lemma against every refinement of the register on each of $\nAdequacyInstances$ random instances of up to six states, and Lemmas~\ref{lem:adequacy-carried} to~\ref{lem:adequacy-world} on the same instances.
+
+On the eight states of the bridge of Section~2.1, take soundness, no crack and no corrosion, as the purpose. The inspection unit's region holds $\nAdequacyBridgeInspection$ states, the budget office's $\nAdequacyBridgeBudget$, the two offices' together $\nAdequacyBridgeBoth$, and an inspection with ultrasound all $\nAdequacyBridgeUltrasound$. Ultrasound makes the inspection unit tell apart $\nAdequacyPriceUltrasound$ pairs, the price Section~2.5 counts, and adequacy for soundness costs $\nAdequacyPriceAdequacy$, the inspection unit's confusions. The other pairs buy corrosion on bridges already cracked, which soundness does not need.
+
+The course of adequacy over time is the script's rule~R7, chosen for curves that can be read. While a correction is kept, adequacy stays at $1$, and in each year after it is cut, adequacy is multiplied by $d=1-m$. The correction is a keeping, as at \itemref{claim:what-is-for}, with the survival $S$ of Model~S, so
+\begin{equation}\label{eq:adequacy-time}
+  E[\alpha_t]=S(t)+\sum_{s=1}^{t}\bigl(S(s-1)-S(s)\bigr)\,d^{\,t-s+1},
+\end{equation}
+which with no correction, $S(s)=0$ after the start, is $d^{\,t}$.
+
+\begin{lemma}[Over time]\label{lem:adequacy-time}
+With $\gamma=\eta/(\sigma_H-\sigma_U)$, $d\ne\sigma_U$ and $d\ne\sigma_H$, Eq.~\eqref{eq:adequacy-time} closes for a correction unheld and one held at the start:
+\[
+\begin{aligned}
+E_U(t)&=\sigma_U^{\,t}+\frac{(1-\sigma_U)\,d}{d-\sigma_U}\bigl(d^{\,t}-\sigma_U^{\,t}\bigr),\\
+E_H(t)&=S_H(t)+\frac{(1+\gamma)(1-\sigma_H)\,d}{d-\sigma_H}\bigl(d^{\,t}-\sigma_H^{\,t}\bigr)-\frac{\gamma(1-\sigma_U)\,d}{d-\sigma_U}\bigl(d^{\,t}-\sigma_U^{\,t}\bigr).
+\end{aligned}
+\]
+\end{lemma}
+\begin{proof}
+$S_U(s-1)-S_U(s)=(1-\sigma_U)\sigma_U^{s-1}$ and $S_H(s-1)-S_H(s)=(1+\gamma)(1-\sigma_H)\sigma_H^{s-1}-\gamma(1-\sigma_U)\sigma_U^{s-1}$, and each sum is then geometric.
+\end{proof}
+\inlean{\lean{Adequacy.over_time_unheld}, \lean{Adequacy.over_time_held}.}
+
+With $m=\nAdequacyM$ and Model~S's rates, year $\nAdequacyYears$ leaves an expected adequacy of $\nAdequacyYearFortyNone$, $\nAdequacyYearFortyUnheld$ and $\nAdequacyYearFortyHeld$ per cent with no correction, an unheld one and a held one. This is not \script{compute_purpose.py}, the script behind the book's figure of Section~3.3, where a held correction never lapses and an unheld one ends at a fixed yearly chance, so its values at that year differ.
+
+The model does not say that a real purpose is one quantity, or that real registers can be listed. A wrong course over time leaves the definitions, Lemmas~\ref{lem:adequacy-carried} to~\ref{lem:adequacy-price} and the claims standing.
+
+\entry{claim:drift-has-direction}{proved}{\lean{Composition.drift}, \lean{Composition.drift_can_grow}; \script{compute_drift.py}}
+For every change $\Theta$ with every price empty,
+\begin{equation}\label{eq:drift}
+  B(A)\subseteq B(A').
+\end{equation}
+This is ``cannot shrink''. Both of the other two occur with nothing paid: a change leaving each constitution keeps the between (\lean{attachment_leaves_between}), and on two states a process that tells them apart can come to tell nothing apart, which grows it.
+
+\begin{proof}
+A pair of $B(A)\setminus B(A')$ would lie in some $\pi_i(\Theta)$, by \itemref{claim:change-by-refinement}. For the growth, the pair of the two states lies in no constitution before and in every one after, and no pair leaves any kernel.
+\end{proof}
+
+Eq.~\eqref{eq:balance} bounds the growth by the release. \script{compute_drift.py} checks both inclusions on each of $\nDriftChanges$ random changes.
+
+\entry{claim:every-level-every-join}{proved}{\lean{Invariance.cuts}, \lean{Regress.uptake}, \lean{Composition.no_level_recovers}}
+The list of a person's attention, a team's routines and the rest ties the word ``level'' to its cases, and the formal claim is about nesting. It has three parts: the condition at every level, at every join, and across levels.
+
+\emph{At every level.} A cut reads a nested arrangement at one level, one scale and one span, and what it reads is again an arrangement over finite states. Let $\Lambda(A)$ be the list of the three laws of \itemref{claim:condition-response} and each main result of the families on regress, response, composition and invariance, stated at an arrangement $A$ over its own states, one field for each in \lean{LawsAndResults}. The other theorems of these entries are not fields of it, and those stated for any states hold at a cut by the same instantiation. For every nested arrangement $N$ and cut $\kappa$,
+\begin{equation}\label{eq:cuts}
+  \kappa\text{ stands at }N\ \Longrightarrow\ \Lambda(N^\kappa),\qquad
+  \kappa\text{ reads exactly at }N\ \Longrightarrow\ \Lambda(N^{\kappa,\Exact}).
+\end{equation}
+
+\begin{proof}
+Each result was proved for any finite states, $N^\kappa$ is an arrangement over finite states, and the list holds there by instantiation.
+\end{proof}
+
+Eq.~\eqref{eq:cuts} does not say that any quantity a law speaks of stays fixed across cuts, and residue moves (Lemma~\ref{lem:residue}). What is not instantiation is the construction: that a reading exists at every scale, that it makes nothing up, and when it is exact.
+
+\begin{lemma}[The level]\label{lem:level}
+For an arrangement $A$, $\ker\hat c=\bigcap_i\ker c_i$, $\ker\hat a=\bigcap_i\ker a_i$, $B(A)=\ker\hat c\setminus\Delta$ and $\res(\hat c)=\res(A)$. For a nested arrangement $N$ and a depth $d$, the between of the arrangement holding $\widehat M$ for each $M$ at depth $d$ is $B_d(N)$.
+\end{lemma}
+\begin{proof}
+A tuple identifies a pair just when each entry does, which gives the first three, and the fourth is their size. A pair of distinct states lies in that between if and only if it lies in each $\ker\hat c_M$, if and only if it lies in the constitution of each process of each such $M$.
+\end{proof}
+\inlean{\lean{mem_constitution_asProcess}, \lean{mem_kernel_response_asProcess}, \lean{between_eq_asProcess}, \lean{residue_asProcess}, \lean{Nested.between_readLevel}.}
+
+\begin{lemma}[Two readings at a scale]\label{lem:scale}
+For a process $P$ and a scale $\sigma$:
+\begin{enumerate}
+\item $b\in V_\sigma[s]$ if and only if $a(t)=b$ for some $t\approx_Gs$; so $a(s)\in V_\sigma[s]$;
+\item $V_\sigma[s]=\{a(s)\}$ for all $s$ if and only if $\ker\sigma\subseteq\ker a$, and then $V_\sigma[s]=\{a^{\Exact}[s]\}$;
+\item some process $Q$ over $S_\sigma$ and map $e$ have $e\circ a_Q\circ[\cdot]=a$ if and only if $\ker\sigma\subseteq\ker a$;
+\item if $\ker\sigma\subseteq\ker\sigma'$, then $V_\sigma[s]\subseteq V_{\sigma'}[s]$, and the inclusion can be strict;
+\item for $q':S_\sigma\to Q$, each reading carries $q'$ if and only if $P$ carries $q'\circ[\cdot]$.
+\end{enumerate}
+\end{lemma}
+\begin{proof}
+(1) is the definition of the rule. (2) If the values are singletons, then $\sigma(s)=\sigma(t)$ gives $t\approx_Gs$ and $a(t)\in\{a(s)\}$. Conversely, $\ker\sigma\subseteq\ker a$ and $\ker G\subseteq\ker a$ make $a$ constant on $\approx_G$-classes. (3) From $e\circ a_Q\circ[\cdot]=a$, $\sigma(s)=\sigma(t)$ gives $[s]=[t]$ and $a(s)=a(t)$; the converse is the exact reading with $e=\id$. (4) A larger relation generates a larger $\approx_G$, and on two states with $P=\readop(\id)$ the value goes from one response to two as $\sigma$ goes from $\id$ to a constant. (5) What the reading makes is $[s]\mapsto[s]_{\approx_G}$, so it carries $q'$ just when $q'\circ[\cdot]$ is constant on $\approx_G$-classes; since that quantity is already constant on the fibres of $\sigma$, this holds just when $\ker G\subseteq\ker(q'\circ[\cdot])$, which is the kernel criterion.
+\end{proof}
+\inlean{\lean{Process.mem_response_imageAtScale}, \lean{Process.response_mem_imageAtScale}, \lean{Process.imageAtScale_singleton_iff}, \lean{Process.response_imageAtScale_eq}, \lean{exists_exact_reading_iff}, \lean{Process.imageAtScale_mono}, \lean{imageAtScale_grows}, \lean{Process.carries_imageAtScale_iff}, \lean{Process.carries_atScale_iff}.}
+
+Being finer than a scale is no obstacle in (3): a process may tell apart what a scale identifies, so long as its response does not separate the pair. So the demand for the exact response is what excludes a scale, not the wish for a reading.
+
+\begin{lemma}[The span]\label{lem:span}
+For a process $P$ and a set $T$ of histories, $\{x,y\}\in\ker c^T$ if and only if $\{x_t,y_t\}\in\ker c$ for all $t\in T$. Over two histories of one bit, the process reading the bit carries their total and neither history alone does, and the total and one history are incomparable, neither's kernel lying in the other's.
+\end{lemma}
+\begin{proof}
+A tuple identifies a pair when each entry does. The total of $x\in\{0,1\}^2$ is a function of $x$. Neither entry determines it, since $(0,0)$ and $(0,1)$ agree in one entry and differ in total, and $(0,1)$ and $(1,0)$ have one total and differ in each entry.
+\end{proof}
+\inlean{\lean{mem_constitution_overSpan}, \lean{span_carries_aggregate}, \lean{aggregate_and_history_incomparable}.}
+
+\emph{At every join.} A coarse-graining taken up by a process composes with that process's constitution, so nesting and monotonicity cover it with no further principle.
+
+\begin{lemma}[Uptake]\label{lem:uptake}
+Let a join have taker $i$, source $g'=g^{i'}_{k'}$, made $g=g^i_k$ and map $\varphi$, with $c=c_i$. Then
+\begin{equation}\label{eq:uptake}
+  \begin{gathered}
+  \ker g'\subseteq\ker g,\qquad\ker c\subseteq\ker g,\qquad\ker c\subseteq\ker(h\circ G_i)\ \text{ for all }h,\\
+  \res(g')\le\res(g),\qquad\res(c)\le\res(g),\\
+  \res(g')<\res(g)\iff\exists s,t:\ g'(s)\ne g'(t),\ \varphi(g'(s))=\varphi(g'(t)),\\
+  \{s,t\}\in\ker c\ \Longrightarrow\ \varphi(g'(s))=\varphi(g'(t)).
+  \end{gathered}
+\end{equation}
+\end{lemma}
+\begin{proof}
+What the taker makes factors twice, $g=f^i_k\circ c=\varphi\circ g'$. Each line is Lemma~\ref{lem:nesting} of \itemref{claim:inherited-not-emergent} or Lemma~\ref{lem:monotonicity} of \itemref{claim:no-recovery} applied from one side or the other of that factoring. The last line is $\ker c\subseteq\ker g$, read through $g=\varphi\circ g'$.
+\end{proof}
+\inlean{\lean{Regress.uptake}, \lean{join_occurs}, \lean{join_supplies_nothing}, \lean{exists_join_of_constant}.}
+
+The last line of Eq.~\eqref{eq:uptake} is the point: a join carries nothing beyond what the taker already tells apart, for where the source separates a pair the taker's constitution identifies, $\varphi$ gives the two values one value. A join with a constant map exists wherever the taker makes a constant coarse-graining and ties the two processes to nothing, which is why the witness \lean{join_occurs} has a map that is not constant.
+
+\emph{Across levels.} ``What one level cannot register, no level built from it can recover'' holds of a level built from the one below, as Section~\ref{sec:objects} defines it. For a nested arrangement $N$ and depths $d\le e$, if every level from $d$ down to $e$ is built from the one below it, then every $z\in B_e(N)$ has
+\begin{equation}\label{eq:no-level}
+  z\in B_d(N),\qquad\text{and no response at depth }d\text{ separates }z.
+\end{equation}
+
+\begin{proof}
+One step: a pair in $B_{j+1}(N)$ lies in $\ker\hat c_{M'}$ for each arrangement $M'$ at a position at depth $j$, and that kernel lies in the constitution of the process standing there, because the level is built from the one below. So $B_{j+1}(N)\subseteq B_j(N)$. The second clause is \itemref{claim:silence} at each process at depth $d$.
+\end{proof}
+
+The hypothesis does work, for the level above may tell apart what its members do not: a position may hold a plain process, or an arrangement whose process is finer than its members together. Conversely, a change can leave one level's between as it was and enlarge the next.
+
+\begin{lemma}[Relocation]\label{lem:relocation}
+On states $\{0,1,2,3\}$, let $\alpha$ have the classes $\{0,1\},\{2\},\{3\}$, $\alpha'$ the classes $\{0,1\},\{2,3\}$ and $\beta$ the classes $\{0,1,3\},\{2\}$. A tower of two levels with $\readop(\alpha)$ and $\readop(\beta)$ at its inner level and $\readop(\alpha)$ as the process above, and the same with $\alpha'$ for $\alpha$, have inner betweens $\{\{0,1\}\}$ both, and outer betweens $\{\{0,1\}\}\subsetneq\{\{0,1\},\{2,3\}\}$.
+\end{lemma}
+\begin{proof}
+$\ker\alpha\cap\ker\beta=\ker\alpha'\cap\ker\beta=\{\{0,1\}\}\cup\Delta$, since $\beta$ still tells apart what $\alpha'$ stops telling apart. The between above reads $\alpha$ or $\alpha'$ and nothing else.
+\end{proof}
+\inlean{\lean{Composition.relocation}, \lean{relocation_of_conditions}, \lean{relocation_needs_other_self}.}
+
+Lemma~\ref{lem:relocation} is what a balance at one level leaves open about the next. Where the arrangement as a process is composed from all its members together, on both sides, an unchanged between leaves its constitution unchanged, and the between above stays (\lean{relocation_needs_other_self}).
+
+\begin{lemma}[Residue at a cut]\label{lem:residue}
+At a cut $\kappa=(d,\sigma,T)$ standing at $N$, read residue on the pairs of joint states before the scale, $\res_\kappa(N)=\bigl|\bigl\{\{x,y\}:x\ne y,\ x_t\approx_{\hat c_M}y_t\ \forall t,\ \forall M\text{ at depth }d\bigr\}\bigr|$. If $\kappa=(d,\sigma,T)$ and $\kappa'=(d,\sigma',T)$ stand at $N$ with $\ker\sigma'\subseteq\ker\sigma$, then $\res_{\kappa'}(N)\le\res_\kappa(N)$. Residue is not invariant under changes of cut: there are $N$ and cuts standing at it with two values of $\res_\kappa$, by scale and by level.
+\end{lemma}
+\begin{proof}
+A larger $\ker\sigma$ generates a larger relation for each $M$ at depth $d$, so identified pairs stay identified. By scale: on two states let $c=\id$ with a constant rule, and let $\sigma$ be first injective and then constant, so residue goes from $0$ to $1$. By level: take a tower whose outer process and first member read a constant and whose second member reads $\id$, with residue $1$ at depth zero and $0$ at depth one.
+\end{proof}
+\inlean{\lean{Cut.residue_le_of_same_level}, \lean{residue_can_grow_by_scale}, \lean{residue_can_grow_by_level}, \lean{residue_not_invariant_under_cuts}.}
+
+Under a coarser level the same inequality holds where each level between is built from the one below and the finer cut's scale identifies only what every process at its level identifies (\lean{Cut.residue_le_of_coarser}), and dropping either condition can reverse it (\lean{coarser_level_can_shrink}, \lean{coarser_cut_can_shrink_at_scale}).
+
+\entry{claim:what-gets-built}{open}{\lean{Composition.second_kind_unclaimable}, \lean{Composition.holder_made}, \lean{Composition.holder_made_occurs}, \lean{Arrangement.Claimable}}
+What the claim says of its second kind is proved below. That the first kind is favoured over it is open.
+
+Every response is a claim of its own position, since $G_i$ carries $a_i$, so every decision reads claims, and the words ``financed and kept through claims'' select no case here: they tie the claim to a society's forms. What can be asked is what a claim can pay on. For an arrangement $A$ and accessible states $X$:
+\begin{equation}\label{eq:built}
+  \begin{gathered}
+  \mathrm{dep}(F)\ \Longrightarrow\ \text{for all }i\text{ and }r':\ G_i\not\rhd F\ \text{ and }\ P_i^{r'}\text{ holds }F\text{ across no set};\\
+  z\in B(A),\ q\text{ separates }z\ \Longrightarrow\ \text{for all }i\text{ and }r':\ G_i\not\rhd q\ \text{ and }\ P_i^{r'}\text{ holds }q\text{ across no }X;\\
+  K\text{ a keeping},\ G_i\rhd k,\ \ k\text{ takes two values on }X\ \Longrightarrow\ \exists r':\ P_i^{r'}\text{ holds }k\text{ across }X.
+  \end{gathered}
+\end{equation}
+The first two lines say no claim pays on the product of the second kind, and the book's Section~3.6 says as much: that the second kind cannot be claimed without a holder follows from what a claim is. The last is what ``unless a holder is made'' can reach: what is held is the lapse, a quantity of the state, though the product stays out of reach. So under the premise such a capacity lasts only where its lapse is held, by Eq.~\eqref{eq:persistence}, and that process holds something other than the product.
+
+\begin{proof}
+The first line is Eq.~\eqref{eq:nonevent}, and the second Eq.~\eqref{eq:one-shape}. The last is the second line of Eq.~\eqref{eq:limit} at \itemref{claim:limit-not-problem}.
+\end{proof}
+
+\begin{lemma}\label{lem:built-occurs}
+On one arrangement on three bits, with every state accessible and under the premise: a keeping no deciding process holds is cut at the first tight step. With the process that reads it among those that decide, and a decision that reads it, it lasts.
+\end{lemma}
+\begin{proof}
+One process reads whether the step is tight and another whether it is kept. A tight step keeps it only where the second decides and responds to its being kept.
+\end{proof}
+\inlean{\lean{Composition.holder_made_occurs}.}
+
+The two cases differ only in who decides and what the decision reads, so the lemma shows what a holder does and has no gain in it.
+
+What is open is the comparison. A gain its builder registers does no work in any theorem here: under the premise a capacity of either kind that lasts has its lapse held (\lean{Upkeep.held_of_kept}), and any process carrying $k$ can hold it under some rule, whether or not $k$ comes from a gain. To state ``favoured'' one would need a statement of how financing through claims selects among capacities, beyond a response's reading what its process carries. None is defined here.
+
+\entry{claim:what-accounts-agents-leave-out}{proved}{\lean{Composition.account}, \lean{Composition.account_complete}}
+An account, as Section~\ref{sec:objects} defines it, is any quantity $h\circ\hat c$ built from what each process is constituted to make, and since each $a_i$ is a function of $c_i$, it may hold what each did. For every arrangement $A$, every account $h\circ\hat c$, every $z\in B(A)$ and every $q$ separating $z$,
+\begin{equation}\label{eq:account}
+  z\in\ker(h\circ\hat c),\qquad h\circ\hat c\not\rhd q,
+\end{equation}
+and for every position $i$, $\hat c\rhd c_i$ and $\hat c\rhd a_i$. The first part is ``contains nothing that lies between the parties''. The second is ``can be complete for every party'': the account that keeps $\hat c$ carries all each process registered and did, and Eq.~\eqref{eq:account} holds of it wherever $B(A)$ is not empty.
+
+\begin{proof}
+The inclusion is Lemma~\ref{lem:nesting} of \itemref{claim:inherited-not-emergent}, and a carried $q$ would identify $z$ by the kernel criterion. Each $c_i$ is an entry of $\hat c$, and $a_i$ is $r_i\circ(f^i_k)_k$ of that entry.
+\end{proof}
+
+The claim's word ``intended'' reads as a further function of what the party registers, and $h$ ranges over all of those.
+
+\entry{claim:removing-cause}{proved}{\lean{Persistence.removing_cause}, \lean{Persistence.removing_cause_occurs}, \lean{Persistence.removing_cause_can_make_holder}, \lean{Upkeep.withoutCause}; \script{compute_causes.py}}
+Read a cause as a value of what the deciding responses do, here their value at a state $c$, and removing it as taking from $X$ the states with that value, to leave $X'$. That is a change of the world, so nothing registered moves. For every keeping $K$, with $K$'s lapse held across $X'$ exactly where it is across $X$ and held across neither, and every course $x$ that runs $K$ and meets the premise on $X'$:
+\begin{equation}\label{eq:cause}
+  \begin{gathered}
+  B(A)\text{ stays, and every price and release is empty};\\
+  \exists s\in X':\ \ k(s),\ \text{ not }\delta_K(s),\ \text{ and some deciding response differs at }s\text{ and }c;\\
+  \exists n\ \forall m:\ \neg\,k(x_{n+m}).
+  \end{gathered}
+\end{equation}
+The second line is ``open to other causes'', and it is the premise's second clause read on the smaller set: the strength lies there, as at \itemref{claim:persistence}. What the rest adds is that the arrangement does not move and that the cut is another value than the one removed.
+
+\begin{proof}
+The first line is the first of Eq.~\eqref{eq:kept} at \itemref{claim:what-is-kept}. The lapse is not held across $X'$, so the second clause gives $s\in X'$, and each state of $X'$ differs from $c$ in some deciding response. The last line is Eq.~\eqref{eq:persistence}, with the fact that once lapsed it stays lapsed.
+\end{proof}
+
+Holding across the smaller set is a hypothesis of its own, and the claim's ``leaves what each party holds as it was'' is that hypothesis.
+
+\begin{lemma}\label{lem:cause-holder}
+Taking states out of $X$ can make a holder: on two bits there is a process and an upkeep whose lapse no deciding process holds across all the states, and which that process holds across the states left when one value of its response is removed. And on three bits, with two causes: remove the first, and the premise is met, the lapse stays unheld, and the other cuts. Remove every cause, and nothing is left that cuts, so the second clause fails, and the keeping lasts unheld.
+\end{lemma}
+\begin{proof}
+A response fixed by $k$ across a set can fail to be across a larger one. In the second part, the process reads the two causes and the decision asks that neither has arisen.
+\end{proof}
+\inlean{\lean{Persistence.removing_cause_can_make_holder}, \lean{Persistence.removing_cause_occurs}.}
+
+So where no cause is left, the failure is not open to one, and that is the premise failing on the smaller set. \script{compute_causes.py} takes causes away from model cities, with a route of folding that no cause opens.
+
+\entry{definition:invariance-under-redescription}{definition}{\lean{Invariance.split}, \lean{Relabelling}, \lean{Case.HistoryChange}}
+A feature of an arrangement is a feature in the sense of Section~\ref{sec:objects}, and it is invariant under redescription when it is invariant under relabellings and under changes of history. The definition's three examples read those two kinds of change. Other people in the posts are a relabelling with $\tau$ and $\lambda$ the identities, between settings with the same constitutions, the same held quantities and the same joins. Another field's words are a relabelling that renames the states. Other causes at work are a change of history. Eq.~\eqref{eq:relabelling} is the definition's ``what each party registers and holds, and how the parties are joined''.
+
+What this comes to is that such a feature is a function of the content. For every feature $\Phi$ on the cases over given $S$ and $I$, with $\con$ the map from a case to its content, these are equivalent:
+\begin{equation}\label{eq:split}
+  \begin{gathered}
+  \Phi\text{ is invariant under relabellings and under changes of history};\\
+  \con(\Case)=\con(\Case')\ \Longrightarrow\ \Phi(\Case)=\Phi(\Case');\\
+  \Phi=\psi\circ\con\ \text{ for some }\psi\text{ on contents}.
+  \end{gathered}
+\end{equation}
+Two checks amount to one condition because a case with the content of another is reached from it by one relabelling, carrying the state that obtains, and then one change of history.
+
+\begin{proof}
+If $\Phi$ passes both checks and $\Case=(\Set,o)$, $\Case'=(\Set',o')$ have one content by a relabelling $(\tau,\lambda)$, then $\Case\to(\Set',\tau(o))$ is a relabelling, with $\tau(o)$ accessible, and $(\Set',\tau(o))\to\Case'$ a change of history. Conversely, each of the two kinds of change stays within one content. The second and third statements are one by the universal property of the quotient, where a value at a content is $\Phi$ at any of its cases, and each setting has a case since $X\ne\emptyset$.
+\end{proof}
+
+\begin{lemma}[Content]\label{lem:content}
+Relabellings compose and invert, so having one content is an equivalence. For every bijection $\tau$ of the states, $\Set$ with its states renamed by $\tau$ is a relabelling of $\Set$. Two settings differing only in their listed joins can have two contents, and a process alone has another content than the same process beside an absent one, or held twice.
+\end{lemma}
+\begin{proof}
+Composition and inversion act on each clause of Eq.~\eqref{eq:relabelling}. Renaming states carries kernels and the holding of $q$ to that of $q\circ\tau^{-1}$, since every clause of holding is a statement about values at states. A relabelling matches each join with a join and each position with a position, so a setting with a listed join and a setting without have none between them, and positions in bijection rule out the last two.
+\end{proof}
+\inlean{\lean{contentSetoid}, \lean{Setting.relabelling}, \lean{content_reads_joins}, \lean{absent_changes_content}, \lean{held_twice_changes_content}.}
+
+\begin{lemma}[Three features]\label{lem:kinds}
+Over four states and two positions, $|B(A)|$ is invariant under both kinds of change and factors through the content; whether $\{0,1\}\in B(A)$ is changed by a relabelling and by no change of history; and whether some process identifies the state that obtains with another state is invariant under relabellings and changed by a change of history.
+\end{lemma}
+\begin{proof}
+A relabelling carries the between bijectively onto the other's, so its size stays, and a change of history leaves the arrangement, of which the first two features are read. Take the setting with both positions holding the reading of a map with classes $\{0,1\},\{2\},\{3\}$ and all states accessible. The swap of $1$ and $2$ takes $\{0,1\}$ out of the between. The third feature is carried by any relabelling, with $t$ going to $\tau(t)$ and the position to $\lambda$ of it. It holds at state $0$, identified with $1$, and fails at state $2$, whose class is a singleton.
+\end{proof}
+\inlean{\lean{Invariance.split_kinds}, \lean{betweenSize_relabels}, \lean{obtainsShared_relabels}.}
+
+Lemma~\ref{lem:kinds} shows the two kinds are independent checks: only the feature passing both factors through the content.
+
+\entry{claim:effort-follows-what-is-held}{proved}{\lean{Effort.moves}, \lean{Effort.needs_fixed_whole}, \lean{Effort.follows_square}, \lean{Effort.share}; \script{compute_reporting.py}}
+Read effort as a fixed budget that follows held losses, Eq.~\eqref{eq:share}, and ``a report comes to be held and the work it describes does not'' as a rise in the loss on the report with the loss on every other use, the work among them, as it was. For every weight $w$, all profiles $\ell,\ell'$ with $\ell$ non-negative, and uses $r\ne u$ with $w(\ell(u))>0$, $\ell(r)<\ell'(r)$ and $\ell'=\ell$ off $r$,
+\begin{equation}\label{eq:effort}
+  e_{\ell'}(u)<e_\ell(u),\qquad e_\ell(r)<e_{\ell'}(r),\qquad\sum_ve_{\ell'}(v)=1.
+\end{equation}
+Effort moves from the work to the report, and the whole stays. The rule of Eq.~\eqref{eq:share} carries this: the theorem is about that rule, and that real effort follows it is the claim's reading. ``Comes to be'' is the hypothesis on $u$, that some effort lay on the work: where nothing at all is held on it, it has no share and there is nothing to move, and the claim's words exclude that corner.
+
+\begin{proof}
+Write $R=\sum_{v\ne r}w(\ell(v))$, which is at least $w(\ell(u))>0$ and is the same under both profiles, and $a<a'$ for the two weights of $r$. The share of $u$ goes from $w(\ell(u))/(a+R)$ to $w(\ell(u))/(a'+R)$, and that of $r$ from $a/(a+R)$ to $a'/(a'+R)$.
+\end{proof}
+
+The fixed whole is what does the moving: a use that takes its weight with no fixed whole gains under the same rise, and takes nothing from another (\lean{Effort.needs_fixed_whole}). \script{compute_reporting.py} runs the rule with $w(x)=x^2$, which is such a weight (\lean{Effort.follows_square}).
+
+\entry{claim:toxics-release-inventory}{record}{}
+The case and its sources are in the book's Section~5.2, Case~2.
+
+\entry{claim:waiting-time-targets}{record}{}
+The case and its sources are in the book's Section~5.2, Case~2.
+
+\entry{claim:what-sorts-reporting}{proved}{\lean{Effort.sorts}, \lean{Effort.gamed_either_way}, \lean{Use.held}; \script{compute_reporting.py}}
+Take four uses, the work, filing the report, raising the figure by other means, and other duties, under a fixed budget that gives nothing where nothing is held. With no requirement, a loss $a>0$ is held on the work and $b>0$ on other duties. For a requirement, hold $h$ more on the work where the loss is on the thing reported, and $g$ on the other means where a loss on the figure reaches them. Write $e^{h,g}$ for the shares. For $h,g>0$,
+\begin{equation}\label{eq:sorts}
+  \begin{gathered}
+  e^{0,0}(\mathrm{report})=e^{0,0}(\mathrm{means})=0;\\
+  e^{0,0}(\mathrm{work})<e^{h,0}(\mathrm{work}),\qquad e^{h,0}(\mathrm{means})=0;\\
+  0<e^{h,g}(\mathrm{means}),\qquad e^{h,g}(\mathrm{work})<e^{0,0}(\mathrm{work})\iff w(a+h)\,w(b)<w(a)\bigl(w(b)+w(g)\bigr).
+  \end{gathered}
+\end{equation}
+The first line is noise: a requirement no one holds a loss on gets no effort and moves none. The second is effective: a loss on the thing reported raises the work. The third is gamed: a loss on the figure brings effort to other means, and the work falls exactly where the last inequality holds. So what sorts them is what is held, and on what. The three are computations under one rule, and they do not say that every requirement sits in one of them: a loss can land on two uses at once, as two rows of the book's table in Section~5.2 do.
+
+\begin{proof}
+With $w(0)=0$ the totals are $w(a)+w(b)$, $w(a+h)+w(b)$ and $w(a+h)+w(g)+w(b)$. The second line compares $w(a)/(w(a)+w(b))$ with $w(a+h)/(w(a+h)+w(b))$, with $w(a)<w(a+h)$. The third cross-multiplies the two shares of the work.
+\end{proof}
+
+Both sides of the last inequality occur: under $w(x)=x^2$ with $a=b=h=1$, it holds at $g=2$ and fails at $g=1$ (\lean{Effort.gamed_either_way}). A loss on the report alone is \itemref{claim:effort-follows-what-is-held}. \script{compute_reporting.py} runs the three groups over a population of offices, with how far a loss on the figure reaches other means set by what they cost.
+
+\entry{claim:joint-prohibition}{proved}{\lean{Composition.prohibition}, \lean{Composition.prohibition_little}; \script{compute_stack.py}, \script{compute_layers.py}}
+Read a party's forbidding as a response that only forbids or allows, Eq.~\eqref{eq:outcome}, and ``together forbid'' as an arrangement that does not reach the outcome. There are a finite $S$, a finite $I$, an arrangement over them whose responses only forbid or allow, and an outcome $O$ with
+\begin{equation}\label{eq:prohibition}
+  |S|=256,\quad|I|=8,\quad O\not\subseteq F_i\ \text{ for every }i,\quad O\subseteq\bigcup_iF_i.
+\end{equation}
+No process excludes $O$, and the arrangement never reaches it.
+
+\begin{proof}
+Let $S=\{0,1\}^8$, $I=\{1,\dots,8\}$, $c_i(s)=s_i$, with the rule forbidding where the value is $1$, and let $O$ be the states with at least five ones, $\binom85+\binom86+\binom87+\binom88=93$ of them. The state with a one everywhere but at $i$ is in $O$ and allowed at $i$. Every state of $O$ has some $s_i=1$, which position $i$ forbids.
+\end{proof}
+\inlean{\lean{Composition.prohibition}, \lean{witnessOutcome_ncard}, \lean{mem_witnessOutcome_iff}.}
+
+In that witness each process forbids half the states, so it does not yet say ``each forbid little''. The next lemma does: the share each forbids can be as small as one likes.
+
+\begin{lemma}\label{lem:little}
+For every $n\ge2$ there are an arrangement of $n$ processes over $n$ states and an outcome $O$ such that each process forbids one state, none excludes $O$, and the arrangement does not reach $O$.
+\end{lemma}
+\begin{proof}
+Let position $i$ read whether the state is $i$ and forbid where it is, with $O=S$. A state other than $i$ is in $O$ and allowed at $i$, and each state is forbidden at its own position.
+\end{proof}
+\inlean{\lean{Composition.prohibition_little}.}
+
+\begin{lemma}\label{lem:prohibition-room}
+Over any $S$ with two distinct states there are two positions and an outcome doing the same. With one position, what the arrangement does not reach, its one response excludes. With $|S|=1$ and at least one position, no outcome is left unexcluded by each response and unreached.
+\end{lemma}
+\begin{proof}
+For the first, let position $j$ read and forbid the state $s_j$ and no other, with $O=\{s_1,s_2\}$. For the second, not reaching says $b(s)=\forbid$ for every $s\in O$. For the third, if no response excludes $O$ then $O$ holds the one state, and each response allows it there, which reaches $O$.
+\end{proof}
+\inlean{\lean{exists_prohibition_of_ne}, \lean{not_prohibition_of_one_position}, \lean{not_prohibition_of_subsingleton}.}
+
+The model is the same construction over a population. \script{compute_stack.py} states its rules at its head: on $\nStackProjects$ projects it checks Eq.~\eqref{eq:prohibition} by assertion, and over a population of proposed projects each review alone lets through about $\nStackAloneLow$ per cent of them and the $\nStackConcerns$ together about $\nStackProposals$ per cent. \script{compute_layers.py} adds reviews one at a time, up to $\nLayersMost$, and counts homes as well: one review lets through about $\nLayersOneHomes$ per cent of the homes and eight about $\nLayersEightHomes$ per cent.
+
+\entry{claim:one-shape-named-separately}{proved}{\lean{Composition.one_shape}, \lean{Response.holds_nothing_forestalled}, \lean{Relabelling.shape_iff}, \lean{dependsOnForestalled_relabel}}
+The claim's shape has two kinds. Something whose product is a prevented failure reads as a quantity $F$ with $\mathrm{dep}(F)$. A difference no responsible party registers reads as a quantity $q$ separating a pair $z$ of $B(A)$, where $A$ is the arrangement of the responsible parties. ``Everyone involved acts reasonably'' reads as any rule at all, and ``left unprovided'' as what no rule can do. Then:
+\begin{equation}\label{eq:one-shape}
+  \begin{gathered}
+  \mathrm{dep}(F)\ \Longrightarrow\ \text{no process holds }F\text{ across any set of situations};\\
+  z\in B(A),\ q\text{ separates }z\ \Longrightarrow\ \text{under all rules no }a_i\text{ separates }z,\ \text{no }G_i\text{ carries }q,\ \text{no }P_i^{r'}\text{ holds }q.
+  \end{gathered}
+\end{equation}
+Both lines come to one fact, that the quantity is carried by nothing the parties make, and that fact is \itemref{claim:condition-response} at work. So the two kinds are instances of one condition in the sense the proofs can give. ``Whatever the field calls it'' is that a relabelling carries the shape: for every relabelling $(\tau,\lambda)$ from a setting of $A$ to a setting of $A'$, every bijection $\pi$ of the states, and all $q$ and $F$,
+\begin{equation}\label{eq:one-shape-relabel}
+  \begin{gathered}
+  \bigl(\exists z\in B(A):\ q\text{ separates }z\bigr)\iff\bigl(\exists z\in B(A'):\ q\circ\tau^{-1}\text{ separates }z\bigr),\\
+  \mathrm{dep}(F)\ \Longrightarrow\ \mathrm{dep}\bigl(F\circ(\pi^{-1}\times\pi^{-1})\bigr).
+  \end{gathered}
+\end{equation}
+
+\begin{proof}
+The first line of Eq.~\eqref{eq:one-shape} is Eq.~\eqref{eq:nonevent}. In the second, a change of rules leaves each constitution, so \itemref{claim:between} applies under every choice of rules, and a quantity separating $z$ is carried by no $G_i$, as at \itemref{claim:change-by-attachment}, while holding asks that it be carried. In Eq.~\eqref{eq:one-shape-relabel} a relabelling carries the between onto the between, by Eq.~\eqref{eq:relabelling}, and $z$ lies outside $\ker q$ if and only if $\tau(z)$ lies outside $\ker(q\circ\tau^{-1})$. Renaming the states carries the witnesses of Eq.~\eqref{eq:dep} to witnesses.
+\end{proof}
+
+Which problems of which fields have this shape is what the book's table in Section~6.1 reads, row by row.
+
+\entry{claim:one-type-remedy-found-separately}{open}{\lean{Composition.routes}}
+Lemma~\ref{lem:routes} of \itemref{claim:what-is-kept} is the mathematics nearest this claim: a response can follow what separates a pair of the between only by a price, or by borrowing.
+
+It does not give the claim's words. Read as a keeping, a remedy that lasts under the premise has its lapse held, by Eq.~\eqref{eq:persistence}, and that reaches one half of the claim for such a remedy, whichever route it took. Two things stay open. That a remedy that does not hold a lapse must have built a party that registers what was missed is not what the lemma's second case forces, since it names no loss beyond the response itself: a tie is shown to be enough, by Lemma~\ref{lem:tied} of \itemref{claim:change-by-attachment}, and it is not shown to be needed. And that fields have found remedies of these two shapes is what the book's Section~6.2 reads in four cases.
+
+\entry{claim:between-fields}{record}{}
+The cases are in the book's Section~6.3, infrastructure and reform. Read a field's literature as a party, and \itemref{claim:between} says what lying between such parties comes to; that some differences do lie between fields is a statement about the literatures, and those sections carry it.
+
+\entry{claim:shared-shape-shared-lessons}{proved}{\lean{Relabelling.shared_lessons}, \lean{Invariance.split}, \lean{Relabelling.persistence_carried}, \lean{Relabelling.persistence_carried_at_cut}, \lean{Persistence.needs_one_content}, \lean{Persistence.matched_do_not_behave_alike}}
+Read ``share the condition's shape'' as one content, Section~\ref{sec:objects}, and ``what the condition governs'' as what a relabelling carries. For every relabelling $(\tau,\lambda)$ from $\Set=(A,X)$ to $\Set'=(A',X')$, every position $i$ and every $q$,
+\begin{equation}\label{eq:shared}
+  \begin{gathered}
+  B(A')=\tau\bigl(B(A)\bigr),\qquad\res(A')=\res(A),\\
+  P_i\text{ holds }q\text{ across }X\iff P'_{\lambda(i)}\text{ holds }q\circ\tau^{-1}\text{ across }X',\\
+  \bigl(\exists z\in B(A):\ q\text{ separates }z\bigr)\iff\bigl(\exists z\in B(A'):\ q\circ\tau^{-1}\text{ separates }z\bigr).
+  \end{gathered}
+\end{equation}
+So what is learned of one setting about what lies between holds of the other under the relabelling. Under this reading the claim comes down to invariants being invariant: a content is defined as what a relabelling keeps, and Eq.~\eqref{eq:shared} reads off what it keeps. Over one $S$ and $I$, a feature invariant under redescription takes one value across settings of one content, by Eq.~\eqref{eq:split} at \itemref{definition:invariance-under-redescription}. Settings over different $S$ and $I$ share shape at a cut when what their cuts read, each with its accessible states, has one content, and Eq.~\eqref{eq:shared} then holds at the cuts, as every law and derived result does there (\lean{Invariance.cuts}). That is how the book uses the claim across fields whose worlds differ in size, in Section~6.3, Section~8.3 and Section~13.
+
+\begin{proof}
+Eq.~\eqref{eq:relabelling} carries each constitution, so it carries the pairs lying in all of them, and $\tau$ is a bijection on pairs, so the size stays. The second line is a clause of the definition of a relabelling, so it holds by that definition and there is nothing to prove. The third is Eq.~\eqref{eq:one-shape-relabel}.
+\end{proof}
+
+For the claim's ``what cannot persist'', read what is learned in one setting as what a course shows there. Let $K$ be a keeping of $\Set$ and $K'$ a keeping of $\Set'$, matched: $k'=k\circ\tau^{-1}$ and $D'=\lambda(D)$, with nothing else of the two alike, their decisions and their products among them. Then
+\begin{equation}\label{eq:shared-persistence}
+  \begin{gathered}
+  \text{a holder of }k\text{ across }X\text{ reaches }D\iff\text{a holder of }k'\text{ across }X'\text{ reaches }D';\\
+  x\text{ runs }K\text{, meets the premise on }X\text{ and stays kept}\ \Longrightarrow\ \text{a holder of }k'\text{ across }X'\text{ reaches }D';\\
+  \text{no holder of }k\text{ across }X\text{ reaches }D\ \Longrightarrow\ \text{every course of }\Set'\text{ that runs }K'\text{ and meets the premise on }X'\text{ cuts it}.
+  \end{gathered}
+\end{equation}
+Here a holder reaches $D$ when it sits at a position of $D$ or a join passes what it makes to one. The first line is the second line of Eq.~\eqref{eq:shared} read at $k$, with the joins a relabelling carries, so it is a clause of what a relabelling is, and the other two are Eq.~\eqref{eq:persistence} through it. What crosses is whether a holder reaches the decision, and with that what the theorem says where none does: what cannot persist, the claim's own words. Lasting does not cross, and the claim does not say it does: two keepings of one setting, matched and each with its lapse held, can differ in that one stays kept along a course meeting the premise and the other along no such course (\lean{Persistence.matched_do_not_behave_alike}). So ``behave alike'' reads at the size of who holds what. Nor does the premise cross: it is said of each setting's own course, since the rules a relabelling leaves out are what the second clause reads. All of this holds at a cut, for settings that share shape there (\lean{Relabelling.persistence_carried_at_cut}), as Eq.~\eqref{eq:persistence} does (\lean{Persistence.at_cut}).
+
+\begin{proof}
+A position of $D'$ is $\lambda(i)$ for an $i\in D$, a relabelling carries each join onto one whose giver and taker are the matches of its own, and $P_i$ holds $k$ across $X$ just when $P'_{\lambda(i)}$ holds $k\circ\tau^{-1}$ across $X'$.
+\end{proof}
+
+One content is needed for this. Two settings on two bits, with the same constitution at each position and no joins, are not of one content where one has a process responding to whether it is kept and the other the same process with a constant rule, and a deciding process holds a keeping's lapse on the first and none does on the second (\lean{Persistence.needs_one_content}).
+
+\entry{claim:reform-follows-visibility}{record}{\lean{Composition.between}}
+The claim's reason has two halves. That a problem can be responded to only once some party registers it follows from \itemref{claim:condition-response}: for $z\in B(A)$, no response of $A$ separates $z$, Eq.~\eqref{eq:between-result}, so a problem that is such a difference is responded to, across the states holding that pair, only once some process comes to tell it apart. That most problems are first registered through an event is a frequency, and the book's Section~7.1 carries it with its sources.
+
+\entry{claim:what-fix-leaves}{proved}{\lean{Composition.fix_hires}, \lean{Persistence.fades}, \lean{Persistence.fades_occurs}; \script{compute_orders.py}}
+The first sentence says what first order means. The book's Section~7 sorts reforms by what each changes, and a first-order fix changes neither what is registered nor what is held, so the sentence is a reading, with nothing to prove there. One small fact stands beside it: a price can buy nothing new. For every $A$, a position $k$ holding an absent process and a position $j$, there is a change from $A$ with
+\begin{equation}\label{eq:hires}
+  P_k'=P_j,\qquad P_i'=P_i\ \text{ for }i\ne k,\qquad B(A')=B(A),\qquad\pi_k(\Theta)=\{z:z\notin\ker c_j\}.
+\end{equation}
+Position $k$ pays for all that $P_j$ tells apart, and the between stays as it was.
+
+\begin{proof}
+A pair lies in $\ker c_k'=\ker c_j$ if it lies in every $\ker c_i$, and the absent process's kernel holds every pair, so the two betweens hold the same pairs. The price at $k$ is the last set of Eq.~\eqref{eq:hires} by its definition, since $\ker c_k$ holds every pair.
+\end{proof}
+
+For the second sentence, read the event's fading as a step from which the course's premise is on a set where the lapse is not held. For every keeping $K$, course $x$ and step $n$, where $K$'s lapse is not held across $Y$ and the course from $n$ on runs $K$ and meets the premise on $Y$,
+\begin{equation}\label{eq:fades}
+  \exists m\ \ \forall j:\ \ \neg\,k(x_{n+m+j}).
+\end{equation}
+The strength lies in the premise on $Y$. What the lemma below adds is that one process can hold across one set and not across another, so a holder can last as long as the event does.
+
+\begin{lemma}\label{lem:fades}
+For every $n$, there is a course and a keeping on three bits, attention, whether it is kept, and whether the step is tight, with one arrangement throughout. A council responding to attention and to the keeping together holds its lapse across the states where attention stands. Across the tight states where attention has gone no deciding process holds it, and the course from step $n+1$ meets the premise there. It is kept through step $n+1$ and cut at $n+2$.
+\end{lemma}
+\begin{proof}
+The council reads both and responds with the two together, so where attention stands its response is whether it is kept, and where attention has gone its response is constant. The course's attention stands through step $n$.
+\end{proof}
+\inlean{\lean{Persistence.fades_occurs}.}
+
+\script{compute_orders.py} runs reforms cut as attention fades. Its rule for what is cut when is at its head.
+
+\entry{claim:second-order-reforms-need-holders-their-own}{proved}{\lean{Persistence.decays}, \lean{Persistence.reform_decays}; \script{compute_orders.py}, \script{compute_city.py}}
+Read a second-order reform as a keeping, as the book's Section~7.2 does: its product is problems that do not recur. Read ``decays'' as cut at some step and cut from there on, and ``whose own lapse costs no one'' as lapse not held. For every keeping $K$, every $X$ and every course $x$ that runs $K$ and meets the premise, if $K$'s lapse is not held across $X$,
+\begin{equation}\label{eq:decays}
+  \exists n\ \ \forall m:\ \ \neg\,k(x_{n+m}).
+\end{equation}
+The quantifier is ``like any other'', and nothing in the theorem is about reforms: the strength lies in the premise, as at \itemref{claim:persistence}.
+
+\begin{proof}
+Eq.~\eqref{eq:persistence} gives a step at which it has lapsed, and by Eq.~\eqref{eq:runs} a lapse stays.
+\end{proof}
+
+The words ``of their own'' mean that holding what a reform provides does not hold the reform.
+
+\begin{lemma}\label{lem:reform-decays}
+On three bits and for every $n$: a reform whose lapse no deciding process holds, under the premise, is cut at step $n+1$. A council holds a fix's lapse across the states where the reform stands, and that fix is cut one step after the reform.
+\end{lemma}
+\begin{proof}
+The arrangement and course are those of Lemma~\ref{lem:fades}, with the first bit now the reform, kept in calm steps only.
+\end{proof}
+\inlean{\lean{Persistence.reform_decays}.}
+
+\entry{claim:orders-depend-each-other}{proved}{\lean{Composition.remit_for_what_counts}, \lean{Composition.third_order_occurs}, \lean{Persistence.lapse}, \lean{Persistence.held_reform_keeps_fix}, \lean{Process.Counts}; \script{compute_orders.py}}
+The claim has two sentences, and each gives its reason.
+
+Read a builder of remits as a process, and building one for $q$ across $X$ as a decision of that process that follows $q$ there. For every process $P$, every $X$ and every $q$,
+\begin{equation}\label{eq:counts}
+  \bigl(\exists r':\ a^{r'}\text{ follows }q\text{ across }X\bigr)\iff q\text{ counts for }P\text{ across }X.
+\end{equation}
+So a remit is built only for what counts, and a change of what counts is what makes building possible where it was not. This is the first line of Eq.~\eqref{eq:limit} at \itemref{claim:limit-not-problem}, applied to the builder. Under this reading ``can be built only for what counts'' holds by the definitions: what counts is what reaches the party that builds, and building for $q$ is following it. Section~7.3 of the book licenses that reading, for it says what counts as a loss is itself something registered, and it is the weaker one: what reaches a builder need not count as a loss. A change that happens to bring a position to carry $q$, with no decision following $q$, is not excluded, and it is not building for $q$.
+
+\begin{proof}
+Eq.~\eqref{eq:limit}, with the definition of counting.
+\end{proof}
+
+\begin{lemma}\label{lem:third-order}
+On two bits, for a builder reading the first, the second does not count and no rule builds for it. After a change to reading the second, the second counts and that process is a remit for it.
+\end{lemma}
+\begin{proof}
+A carried quantity is a function of the first bit. If the second fixed it, it would agree across each value of the first at one value of the second, so it would be constant, and it would vary with nothing.
+\end{proof}
+\inlean{\lean{Composition.third_order_occurs}.}
+
+The second sentence says that first-order fixes last only through second-order reform, a necessity, and its reason, ``a fix persists only where someone holds its lapse'', is Eq.~\eqref{eq:persistence}. What a second-order reform does for the fix is give it a holder. With one the fix can last, and it need not, since a held lapse can still be cut (\lean{held_can_be_cut}): the claim says ``only''.
+
+\begin{lemma}\label{lem:reform-keeps-fix}
+On the arrangement of Lemma~\ref{lem:reform-decays}, on a course tight from its second step, with a holder of the reform's own lapse deciding too: the premise on the reform is met, the reform stays at every step, and so does the fix, whose lapse the council holds across the states where the reform stands.
+\end{lemma}
+\begin{proof}
+Each decision keeps at a kept state where its reader responds, and those are the states of the course.
+\end{proof}
+\inlean{\lean{Persistence.held_reform_keeps_fix}.}
+
+Set beside Lemma~\ref{lem:reform-decays}, this is the claim's dependence: the fix lasts where the reform does and no longer. \script{compute_orders.py} runs the orders together over a population.
+
+\entry{claim:limit-not-problem}{proved}{\lean{Process.followable_iff}, \lean{Process.holdable_iff}, \lean{Response.tells_apart_beyond_both}}
+Read a problem the condition explains as a requirement on an arrangement that fails under every rule. The display gives criteria, which mention no rule, for two such requirements: following and holding. For every process $P$, every $X$ and every $q$,
+\begin{equation}\label{eq:limit}
+  \begin{gathered}
+  \bigl(\exists r':\ a^{r'}\text{ follows }q\text{ across }X\bigr)\iff\exists b:\ G\rhd b,\ q\rhd_Xb,\ b\bowtie_Xq;\\
+  \bigl(\exists r':\ P^{r'}\text{ holds }q\text{ across }X\bigr)\iff G\rhd q\ \text{ and }\ q\text{ takes two values on }X.
+  \end{gathered}
+\end{equation}
+Where the right side of the first line fails, no rule has the party follow $q$ across $X$. Where the right side of the second fails at every position, the design leaves $q$ with no one to hold it. In both cases no choice of rule repairs it, which is the sense of ``a limit, not a problem'': what can be changed is what the processes make, or the accessible states, and the condition itself, Eq.~\eqref{eq:condition}, holds of every process throughout.
+
+\begin{proof}
+First line: the new response is such a $b$, by Eq.~\eqref{eq:law-factorization}; conversely, the rule that gives $b$ is the $r'$. Second line: holding asks that $G$ carry $q$, and varying asks for two values of $q$. Conversely, with $q=h\circ G$ the rule $h$ gives the response $q$, which fixes and varies with itself on $X$.
+\end{proof}
+
+The display is not a classification, and the claim's ``are'' is a reading of what its opening words mean. A requirement can fail under every rule with both criteria met. On two bits, under no rule does the reading of the first bit tell apart what the identity tells apart, as Eq.~\eqref{eq:design} at \itemref{claim:designs-that-cannot-run} says, yet some rule has it follow the identity, and the reading of the identity holds the identity under some rule (\lean{Response.tells_apart_beyond_both}). In the claim's words that too requires a party to respond to what does not reach it, so those words are wider than the first line.
+
+\entry{claim:exact-kind}{proved}{\lean{Composition.exact_in_kind}, \lean{between_exact}, \lean{Composition.attachment}, \lean{Composition.at_join}, \lean{Composition.exact_at_join}; \script{compute_exact.py}}
+Read a problem of this kind as a pair $z$ of $B(A)$. For every arrangement $A$ and every such $z$:
+\begin{equation}\label{eq:exact-kind}
+  \begin{gathered}
+  z\in\ker c_i\ \text{ and }\ z\in\ker a_i\ \text{ for all }i;\\
+  z\in\ker g^{i'}_{k'}\ \text{ and }\ z\in\ker g^i_k\ \text{ for each join with source }g^{i'}_{k'}\text{ and made }g^i_k;\\
+  \text{for each change from }A,\ \ z\notin B(A')\iff\exists i:\ z\in\pi_i(\Theta);\\
+  \text{for each }i\text{, some change from }A\text{ has }z\in\pi_i(\Theta),\ z\notin B(A'),\ P_j'=P_j\text{ for }j\ne i.
+  \end{gathered}
+\end{equation}
+Reading down: the difference is $z$, the parties that miss it are all of them, and the first route is the third and fourth lines. The fourth line says nothing of joins, and the change that meets it lists none. The second route, for a quantity separating $z$, is Eq.~\eqref{eq:attachment} at \itemref{claim:change-by-attachment}.
+
+\begin{proof}
+The first line is the definition of $B(A)$ and Eq.~\eqref{eq:between-result}. The second is Eq.~\eqref{eq:law-constitution} at the giver and at the taker. The third is Eq.~\eqref{eq:refinement}. For the fourth, put $\readop(\id_S)$ at position $i$, whose kernel is the diagonal.
+\end{proof}
+
+``The join it falls at'' reads at the join's two parties. For a join $j$ with its giver at position $i$ and its taker at $k$, let $B_j(A)=(\ker c_i\cap\ker c_k)\setminus\Delta$, and read a problem at that join as a pair $z\in B_j(A)$: a mismatch between the two parties the join connects, as the book's Section~8.2 reads its bridge and its Section~1 the problems between agencies. Write $A_j$ for the arrangement of $j$'s giver and taker alone, with $j$ between them.
+
+\begin{lemma}\label{lem:at-join}
+For every arrangement $A$ and every join $j$, $B(A_j)=B_j(A)$ and $B(A)\subseteq B_j(A)$, and for every $z\in B_j(A)$, Eq.~\eqref{eq:exact-kind} holds of $A_j$.
+\end{lemma}
+\begin{proof}
+The between of $A_j$ reads the constitutions of its two processes, which are those at $i$ and $k$, and a pair every process of $A$ misses both of them miss. The rest is Eq.~\eqref{eq:exact-kind} at $A_j$.
+\end{proof}
+\inlean{\lean{Composition.at_join}, \lean{Composition.exact_at_join}.}
+
+So the joins at which $z$ falls are those with $z\in B_j(A)$, and a pair of $B(A)$ falls at every join. The routes are \itemref{claim:change-by-refinement} and \itemref{claim:change-by-attachment} at $A_j$, and a new join is not one, by Eq.~\eqref{eq:unsupplied}: a taker takes up nothing its constitution does not tell apart. A difference the giver tells apart and the taker's constitution identifies is not a problem in this reading, since it lies outside $B_j(A)$: what happens to it there is the last line of Eq.~\eqref{eq:uptake} at \itemref{claim:every-level-every-join}.
+
+The limit is exact in one sense more: it is what no function of what the parties are constituted to make can do, no more and no less.
+
+\begin{lemma}\label{lem:exact}
+A pair $z$ of distinct states lies in $B(A)$ if and only if $z\in\ker(h\circ\hat c)$ for every $h$.
+\end{lemma}
+\begin{proof}
+From left to right, this is Lemma~\ref{lem:nesting} of \itemref{claim:inherited-not-emergent}. From right to left, take $h=\id$: then $z\in\ker\hat c$, which is $z\in\ker c_i$ for all $i$.
+\end{proof}
+\inlean{\lean{between_exact}.}
+
+A process's own rule reads what it makes, and can do less: on two bits, a process constituted to read both and making the first leaves a pair outside the between that no rule of it separates (\lean{Response.rule_short_of_between}).
+
+\script{compute_exact.py} counts the case of two parties on $\nExactStates$ states, where a rule is built on the two registers: $\nExactRegisters$ registers, $\nExactArrangements$ arrangements and, across them, $\nExactRules$ rules, and it asserts that the pairs no such rule separates are the between in each arrangement. Its second part is the count at the end of \itemref{claim:change-by-refinement}.
+
+\entry{claim:distance-bounded-below}{open}{\lean{Remedy}, \lean{Setting.distance}, \lean{Composition.remedy_carried}, \lean{Relabelling.tie_carried}, \lean{Composition.distance_bounded_below}, \lean{Composition.distance_attained}}
+What is proved below is a count under a definition, whose real work is the transport across a relabelling. What ``already working'' would have to mean is open.
+
+Read ``arrangements of the same shape'' as settings with a relabelling onto $\Set'$, and a remedy as in Section~\ref{sec:objects}. For every finite $S'$, every $\Set'$, and every set $\mathcal R$ of remedies in its shape, with $\tau(z)$ the pair a remedy would carry,
+\begin{equation}\label{eq:distance}
+  \bigl|\{\tau(z):\text{ the remedy of }z\text{ lies in }\mathcal R\}\bigr|\ \le\ \res(A').
+\end{equation}
+With the distance defined as the size of the between, this says a subset is no larger than its set: each such pair lies in $B(A')$. The count is of distinct pairs, since two remedies can carry one pair.
+
+\begin{proof}
+A relabelling carries the between onto the between, by Eq.~\eqref{eq:shared} at \itemref{claim:shared-shape-shared-lessons}.
+\end{proof}
+
+Each route carries across a relabelling for its own reason, and that is ``available'' and ``not applied''.
+
+\begin{lemma}\label{lem:remedy-carried}
+Let a remedy lie in the shape of $\Set'$. The pair lies in $B(A')$, so it has not been carried there by a price, and at every position some change takes it out. If its route is a tie, at position $i$ with $\ell$ and $q$, then $P'_{\lambda(i)}$ does not hold $\ell\circ\tau^{-1}$ across $X'$, so the tie is not in place, and a process with the constitution of $P'_{\lambda(i)}$ holds $\ell\circ\tau^{-1}$ and follows $q\circ\tau^{-1}$ across $X'$.
+\end{lemma}
+\begin{proof}
+For the price, take the fourth line of Eq.~\eqref{eq:exact-kind}. For the tie, what is held is carried by Eq.~\eqref{eq:relabelling}, and so is the constitution, so $\ker c'_{\lambda(i)}\subseteq\ker(\ell\circ\tau^{-1})$, and by Eq.~\eqref{eq:unsupplied} a process with that constitution can make $\ell\circ\tau^{-1}$ and respond with it. Each of $q\rhd_X\ell$ and $\ell\bowtie_Xq$ carries under $\tau$, since $\tau$ carries $X$ onto $X'$.
+\end{proof}
+\inlean{\lean{Composition.remedy_carried}, \lean{Relabelling.tie_carried}.}
+
+What is open is the floor. A remedy's price route holds of every pair of every between: the remedies a setting has at its own shape, one for each pair, reach its distance (\lean{Composition.distance_attained}). So ``already working'' and ``in arrangements of the same shape'' add nothing to the definition, and Eq.~\eqref{eq:distance} sets no floor on any arrangement. To give the claim force, ``already working'' would have to name what not every pair has, that some arrangement of the shape has made the change and that it goes on working there, and the distance would have to be measured by something other than the between's size. Neither is defined here, and the book's Section~8.3 says only that the distance may have a floor.
+
+\entry{claim:what-forbids}{proved}{\lean{Response.follows_through_carried}, \lean{Response.no_channel}, \lean{Persistence.forbids}, \lean{Persistence.forbids_at_step}}
+The claim has two sentences, one forbidding at a state and one over a course. For the first, for every process $P$ and $X$, if every quantity $G$ carries is constant on $X$, then
+\begin{equation}\label{eq:no-channel}
+  a\ \text{ follows no quantity across }X,
+\end{equation}
+and where $a$ follows $q$ across $X$ there is $b$ with $G\rhd b$, $b\rhd a$, $q\rhd_Xb$ and $b\bowtie_Xq$. So there is no process whose response follows a difference through nothing it registers. For the second, for every keeping $K$, every $X$, and every course that runs $K$ and meets the premise,
+\begin{equation}\label{eq:forbids}
+  \neg\,\Bigl(\bigl(k(x_t)\text{ for all }t\bigr)\ \text{ and }\ K\text{'s lapse is not held across }X\Bigr).
+\end{equation}
+That is Eq.~\eqref{eq:persistence} read as a prohibition, and what it forbids it forbids under the premise. Lemma~\ref{lem:clauses} is then the remark that calm steps forbid nothing: a course that never meets the value that cuts keeps a keeping no one holds, and so does a rule no value cuts.
+
+\begin{proof}
+The response is itself carried, so it is constant on $X$ and varies with nothing. The second part of Eq.~\eqref{eq:no-channel} takes $b=a$, by Eq.~\eqref{eq:law-factorization}. Eq.~\eqref{eq:forbids} is Eq.~\eqref{eq:persistence}.
+\end{proof}
+
+The book's Section~10.3 pictures the forbidden case as a programme kept through tight year after tight year, years in which keeping it cost someone and cutting it would have cost no one, with no one holding its lapse. Eq.~\eqref{eq:forbids} speaks of being kept at every step, which no finite record can show. One step can be shown.
+
+\begin{lemma}\label{lem:forbids-at-step}
+For every upkeep $K$, every course $x$ that runs it and every step $t$: if the deciding responses at $x_t$ are those of a state $s$ at which $\delta_K(s)$ fails, then $k(x_{t+1})$ fails.
+\end{lemma}
+\begin{proof}
+The decision reads the deciding responses alone, so it fails at $x_t$, and Eq.~\eqref{eq:runs} gives the rest, as in the proof of Eq.~\eqref{eq:persistence}.
+\end{proof}
+\inlean{\lean{Persistence.forbids_at_step}.}
+
+Read with $s$ a kept state at which the decision does not keep it: no capacity survives an occasion on which keeping it costs someone and losing it costs no one. A record can show such a step, and whether a year was such an occasion is a question of identification, as the book's Section~10.4 says. The claim's ``persists stably'' reads as persisting through such occasions.
+
+\entry{claim:correction-runs-error}{proved}{\lean{Correcting}, \lean{Correction.no_faster}, \lean{Correction.unacted_not_carried}, \lean{Correction.without_own_act}, \lean{PricedAct}, \lean{Priced.acts_less}, \lean{Priced.heavy_stops}, \lean{Correction.pace_occurs}, \lean{holding_error_has_no_sign}}
+Read a party's correcting as Eq.~\eqref{eq:correcting}. The claim's first clause, that a party learns it was wrong only from what comes back from acts, is the second implication there, with an act tied to no one, as the definition has it: it is what a correction is here, and the strength of the first sentence lies in that. Then for every process $P$, course $x$ and span $n$ along which $P$ corrects,
+\begin{equation}\label{eq:no-faster}
+  \bigl|\{t<n:\mathrm{corr}(x_{t+1})\}\bigr|\ \le\ \bigl|\{t<n:\mathrm{act}(x_t),\ w(x_{t+1})\}\bigr|\ \le\ \bigl|\{t<n:\mathrm{act}(x_t)\}\bigr|.
+\end{equation}
+This is ``so correction runs no faster than acts that can be wrong'', with the middle term those that came back wrong.
+
+\begin{proof}
+A step on the left has $w(x_{t+1})$, and so $\mathrm{act}(x_t)$, by Eq.~\eqref{eq:correcting}. Each set lies in the next.
+\end{proof}
+
+The definition's clause has a reason and an edge.
+
+\begin{lemma}\label{lem:unacted}
+Let $o$ be what comes of an act, and $e$ what was expected of it. Where at one state that obtains two acts not taken would have had outcomes one of which is wrong and one not, no coarse-graining carries whether the act not taken would have been wrong. And a process can correct with no act of its own behind it, where another's act comes back to it.
+\end{lemma}
+\begin{proof}
+That quantity depends on a forestalled state, so Eq.~\eqref{eq:nonevent} applies. For the second, on two states a process reading the one that says it was wrong, along a course that stays there, corrects at every step and acts at none.
+\end{proof}
+\inlean{\lean{Correction.unacted_not_carried}, \lean{Correction.without_own_act}.}
+
+So nothing comes back from an act not taken, which is \itemref{claim:non-event} at work, and the acts the claim speaks of are those whose return reaches the party.
+
+The second sentence needs a size for holding, and holding has none, so read ``the more heavily'' as a larger weight $c$ in the priced act of Eq.~\eqref{eq:priced}, the rule the book's Section~12.1 prices an act by. The rule carries ``the less it acts'', as no more at any state or over any course. For $c\le c'$, every $v$ and every course,
+\begin{equation}\label{eq:acts-less}
+  \mathrm{act}_{c',v}(s)\Rightarrow\mathrm{act}_{c,v}(s),\qquad\bigl|\{t<n:\mathrm{act}_{c',v}(x_t)\}\bigr|\le\bigl|\{t<n:\mathrm{act}_{c,v}(x_t)\}\bigr|.
+\end{equation}
+And wherever error is possible at each step of a span, there is a weight under which $\mathrm{act}_{c,0}$ takes no act along it, and so by Eq.~\eqref{eq:no-faster} no correction is made. The world's pace is modelled nowhere here, and falling below it reads as no corrections.
+
+\begin{proof}
+The inclusion is $c\,\mathrm{err}\le c'\mathrm{err}$. For the last, take $c=\sum_{t<n}|\mathrm{ret}(x_t)|/\mathrm{err}(x_t)$, so that $\mathrm{ret}(x_t)\le c\,\mathrm{err}(x_t)$ at each step.
+\end{proof}
+
+\begin{lemma}\label{lem:pace}
+One party on one run of occasions, with one return and one error at each. Priced lightly it acts at every step, what comes back says it was wrong, and it corrects at every step. Priced heavily it acts at none and corrects at none. And holding has no sign: a process can hold an error and act where it is largest, so the rule does not follow from holding.
+\end{lemma}
+\begin{proof}
+On two states, take $\mathrm{ret}=\mathrm{err}=1$ and $\mathrm{wait}=0$, with $c=0$ and then $c=2$. For the last, the reading of the identity holds the identity and takes its act at the larger value.
+\end{proof}
+\inlean{\lean{Correction.pace_occurs}, \lean{holding_error_has_no_sign}.}
+
+\entry{claim:which-error-is-held}{proved}{\lean{Response.held_is_of_the_state}, \lean{Response.holds_nothing_forestalled}, \lean{Process.holdable_iff}, \lean{Priced.toward_not_acting}, \lean{Priced.acts_less}, \lean{Priced.any_weight_forgoes}}
+Read the error of acting as a quantity of the state that obtains, since an act that goes wrong is among what obtains, and the error of not acting as a quantity $F$ of situations with $\mathrm{dep}(F)$, since what it weighs is what would have obtained. For every process $P$, every set $W$ of situations and every $F$,
+\begin{equation}\label{eq:which-error}
+  P\text{ holds }F\text{ across }W\ \Longrightarrow\ \bigl(\exists e:\ F(w)=e(o_w)\ \text{ for all }w\bigr)\ \text{ and }\ \neg\,\mathrm{dep}(F).
+\end{equation}
+So what is held is held on what obtains. The first two sentences of the claim are the two readings: a quantity $e$ of the state that takes two values on $X$ can be held, by Eq.~\eqref{eq:limit} at \itemref{claim:limit-not-problem}, and $F$ can be held by no one, by Eq.~\eqref{eq:nonevent}. The third sentence's first clause is Eq.~\eqref{eq:which-error}.
+
+\begin{proof}
+Holding asks that $F(w)=h(\ev_w(G))$ for some $h$ and every $w$, so $e=h\circ G$ serves. The rest is the third line of Eq.~\eqref{eq:nonevent}.
+\end{proof}
+
+The third sentence's last clause, that an arrangement holding error at all drifts toward not acting, and further the more heavily it holds it, is not in Eq.~\eqref{eq:which-error}. It speaks of how heavily a quantity is held and of what happens over time, and holding has no size. So the rule carries it, read through the priced act of Eq.~\eqref{eq:priced}: ``toward not acting'' is Eq.~\eqref{eq:anxious} at \itemref{claim:anxious-arrangement}, and ``further the more heavily'' is Eq.~\eqref{eq:acts-less} at \itemref{claim:correction-runs-error}. ``At all'' is any weight $c>0$ against none: however small $c$ is, some state has an act at weight $0$ that it does not have at weight $c$ (\lean{Priced.any_weight_forgoes}). ``Drifts'' reads as fewer acts over a course. Where what a party supposes of its errors comes from its own acts, Lemma~\ref{lem:loop} at \itemref{claim:anxious-arrangement} shows the acts stopping over time.
+
+\entry{claim:anxious-arrangement}{proved}{\lean{Priced.toward_not_acting}, \lean{Priced.corrections_bounded}, \lean{Priced.can_correct_every_step}, \lean{Priced.heavy_stops}, \lean{Priced.toward_not_acting_occurs}, \lean{waiting_not_a_response}, \lean{Priced.window_stops}, \lean{Priced.window_resumes}; \script{compute_anxious.py}}
+The claim says ``toward not acting'', and ``slowly where being wrong weighs heavily''. Read ``the error of acting is held and the error of waiting is not'' through the priced act of Eq.~\eqref{eq:priced} at $v=0$, against a rule with $v>0$. The rule carries this, as at \itemref{claim:correction-runs-error}. For every $c$, every $v\ge0$, and every course,
+\begin{equation}\label{eq:anxious}
+  \begin{gathered}
+  \mathrm{act}_{c,0}(s)\Rightarrow\mathrm{act}_{c,v}(s),\qquad\bigl|\{t<n:\mathrm{act}_{c,0}(x_t)\}\bigr|\le\bigl|\{t<n:\mathrm{act}_{c,v}(x_t)\}\bigr|;\\
+  \text{along a course on which it corrects under }\mathrm{act}_{c,0}:\quad\bigl|\{t<n:\mathrm{corr}(x_{t+1})\}\bigr|\le\bigl|\{t<n:\mathrm{act}_{c,v}(x_t)\}\bigr|.
+  \end{gathered}
+\end{equation}
+The first line is ``toward not acting''. The difference is real: on one state with return and error $1$, waiting's $1$ and $c=2$, the rule with $v=2$ acts and the rule with $v=0$ does not (\lean{Priced.toward_not_acting_occurs}).
+
+The second line is a bound, and ``slowly where being wrong weighs heavily'' is that bound with Eq.~\eqref{eq:acts-less}: it falls as the weight rises, and at some weight it reaches none (\lean{Priced.heavy_stops}). At a light weight it need not be slow: with the error of acting held at a positive weight and the error of waiting not, a party can act and correct at every step (\lean{Priced.can_correct_every_step}), which is why the claim says where.
+
+\begin{proof}
+$v\,\mathrm{wait}\ge0$, so the first line is an inclusion, and the second is Eq.~\eqref{eq:no-faster} followed by the first.
+\end{proof}
+
+That $v$ is $0$ is more than a choice, where what waiting costs is what would have obtained.
+
+\begin{lemma}\label{lem:waiting}
+Let the error of waiting be a quantity $F$ of situations, and let a rule on $F$ act differently at two situations with one state that obtains. No function of any process's response, read at the state that obtains, is that rule.
+\end{lemma}
+\begin{proof}
+At those two situations the response has one value, by Eq.~\eqref{eq:law-obtains}.
+\end{proof}
+\inlean{\lean{waiting_not_a_response}.}
+
+So a rule with $v>0$ reads a quantity of the state: something registered moving with what waiting costs.
+
+The book's Section~12.1 adds a loop, and its Section~12.4 runs it: what a party supposes of its own errors comes from its own acts. Let $\mathrm{err}_t=(e_t+1)/(a_t+2)$, with $a_t$ the party's acts over the last $L$ steps and $e_t$ the errors among them, an error only of an act.
+
+\begin{lemma}\label{lem:loop}
+With $v=0$ and $\mathrm{ret}\le c/2$ at every step, $L$ steps with no act are followed by no act at any later step, and so, by Eq.~\eqref{eq:no-faster}, by no correction. With $v>0$, $\mathrm{wait}$ the steps since the last act and $\mathrm{ret}\ge0$, the party acts again after any step.
+\end{lemma}
+\begin{proof}
+With no act in the window, $\mathrm{err}=1/2$, so $c\,\mathrm{err}<\mathrm{ret}$ fails and no act is taken; induct on the steps. With $v>0$, each step with no act raises $\mathrm{wait}$ by one, and $\mathrm{ret}+v\,\mathrm{wait}$ passes $c/2$.
+\end{proof}
+\inlean{\lean{Priced.window_stops}, \lean{Priced.window_resumes}.}
+
+This is the book's ``the loop runs down'', and the ``drifts'' of \itemref{claim:which-error-is-held}. The smooth rule of Section~12.4 is Eq.~\eqref{eq:priced} made smooth: it acts more often than not exactly when $W\,q<B+V\,k$, which is Eq.~\eqref{eq:priced} with $c=W$, $\mathrm{err}=q$, $\mathrm{ret}=B$, $v=V$ and $\mathrm{wait}=k$. \script{compute_anxious.py} runs that rule over a population: the heavier being wrong weighs, the more often an arrangement is out of step, more often still where it learns how often it errs only from its own acts, and holding not finding out as well brings it back.
+
+\entry{claim:seeing-is-first-step}{proved}{\lean{Composition.seeing}, \lean{Composition.leaves_iff}}
+Read the reader as a process coming to stand at a position that held an absent process, reading a map that separates a pair of the between, with a rule that does nothing with it. For every arrangement $A$, position $k$ holding an absent process, accessible states $X$, map $e$ and $z\in B(A)$ that $e$ separates, there is a change from $A$ over $X$ such that
+\begin{equation}\label{eq:seeing}
+  \begin{gathered}
+  z\in\pi_k(\Theta),\qquad z\notin B(A'),\qquad B(A')\subseteq B(A),\qquad P_j'=P_j\ \text{ for all }j\ne k,\\
+  P_k'\text{ holds no quantity across any set of states}.
+  \end{gathered}
+\end{equation}
+The first line is ``a party who now registers it'', and by Eq.~\eqref{eq:refinement} a price is the only route by which the between shrinks, which is ``the only route''. The second is ``gives no one a holder by itself'': the new process registers the pair, its response is constant, and every other process is as it was.
+
+\begin{proof}
+Put at position $k$ the process $\readop(e)$ with a constant rule. Its kernel is $\ker e$, which $z$ lies outside, while $z\in\ker c_k$ because $z\in B(A)$. Nothing joins the between, because an absent process's kernel holds every pair, so the position identified before all it identifies after. Holding asks for two values of the response, and it has one.
+\end{proof}
+
+\entry{claim:coordination-across-between}{proved}{\lean{Composition.coordination}, \lean{Composition.coordination_occurs}, \lean{between_exact}, \lean{Persistence.decays}}
+Read parties acting on one understanding as a composite, $A^h$ of \itemref{claim:inherited-not-emergent}, with $h$ the one function of their responses. For every $A$, every $h$, and every $X$ on which $h\circ\hat a$ takes two values,
+\begin{equation}\label{eq:coordination}
+  A^h\text{ holds }h\circ\hat a\text{ across }X.
+\end{equation}
+What makes that more than a process holding its own response is that $h\circ\hat a$ need be carried by no position, and the next lemma says so. It is ``can'': an existence, shown where it is not degenerate. The second sentence is Eq.~\eqref{eq:decays} at \itemref{claim:second-order-reforms-need-holders-their-own}, the coordination read as a keeping, with the strength of the premise.
+
+\begin{proof}
+$A^h$ carries its own response, by Eq.~\eqref{eq:law-factorization}, which fixes and varies with itself on $X$.
+\end{proof}
+
+\begin{lemma}\label{lem:coordination}
+On three bits, let two processes read the first and the second, and let $h$ say whether their responses differ. No position carries $h\circ\hat a$, and so neither holds it under any rule, and $A^h$ holds it across all the states. A pair differing only in the third bit lies between them, and $h\circ\hat a$ does not separate it.
+\end{lemma}
+\begin{proof}
+The first process's response is one at two states differing only in the second bit, where $h\circ\hat a$ takes two values, and likewise the other. The pair of the last sentence has one value under each response.
+\end{proof}
+\inlean{\lean{Composition.coordination_occurs}.}
+
+So what coordination adds is a holder for what the parties do together, which no single party supplies, as the book says after the claim. What lies between them stays out of reach of every function of what they make (\lean{between_exact}) until one of them comes to register it, as at \itemref{claim:seeing-is-first-step}, and the last sentence of Lemma~\ref{lem:coordination} shows it: the composite's quantity does not separate the pair between them.
+
+
+\section{The claim map}
+\label{sec:map}
+
+Each row comes from the heading of its entry.
+
+\begingroup\small
+\begin{longtable}{@{}l>{\raggedright\arraybackslash}p{9em}>{\raggedright\arraybackslash}p{17em}@{}}
+\toprule
+Item & Standing & Lean name or script\\
+\midrule
+\endhead
+\maprows
+\bottomrule
+\end{longtable}
+\endgroup
+
+\bibliographystyle{amsplain}
+\bibliography{references}
+
+\end{document}

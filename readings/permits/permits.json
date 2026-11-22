@@ -1,0 +1,96 @@
+{
+ "days_largest": 488.0,
+ "days_single": 265,
+ "ended": 8058,
+ "ended_largest": 68,
+ "error_largest": 4.768586356095312,
+ "error_single": 0.5758668895399787,
+ "first": 2015,
+ "groups": [
+  {
+   "ended": 2880,
+   "error": 0.5758668895399787,
+   "group": "1",
+   "median_days": 265,
+   "out": 308,
+   "records": 2986,
+   "share": 10.694444444444445,
+   "timed": 2571
+  },
+  {
+   "ended": 3333,
+   "error": 0.5671283988106258,
+   "group": "2-4",
+   "median_days": 246.0,
+   "out": 407,
+   "records": 3531,
+   "share": 12.211221122112212,
+   "timed": 2924
+  },
+  {
+   "ended": 785,
+   "error": 1.2000682686795139,
+   "group": "5-9",
+   "median_days": 238,
+   "out": 102,
+   "records": 834,
+   "share": 12.993630573248408,
+   "timed": 681
+  },
+  {
+   "ended": 473,
+   "error": 1.3355595994936686,
+   "group": "10-19",
+   "median_days": 254,
+   "out": 44,
+   "records": 505,
+   "share": 9.30232558139535,
+   "timed": 429
+  },
+  {
+   "ended": 319,
+   "error": 1.9844828789447149,
+   "group": "20-49",
+   "median_days": 309.5,
+   "out": 47,
+   "records": 357,
+   "share": 14.733542319749215,
+   "timed": 270
+  },
+  {
+   "ended": 112,
+   "error": 3.6189441222222216,
+   "group": "50-99",
+   "median_days": 257,
+   "out": 20,
+   "records": 125,
+   "share": 17.857142857142858,
+   "timed": 91
+  },
+  {
+   "ended": 88,
+   "error": 3.383165887151408,
+   "group": "100-199",
+   "median_days": 394.5,
+   "out": 10,
+   "records": 95,
+   "share": 11.363636363636363,
+   "timed": 78
+  },
+  {
+   "ended": 68,
+   "error": 4.768586356095312,
+   "group": "200+",
+   "median_days": 488.0,
+   "out": 13,
+   "records": 79,
+   "share": 19.11764705882353,
+   "timed": 54
+  }
+ ],
+ "last": 2022,
+ "plain_closed": 87.0439314966493,
+ "records": 8512,
+ "share_largest": 19.11764705882353,
+ "share_single": 10.694444444444445
+}

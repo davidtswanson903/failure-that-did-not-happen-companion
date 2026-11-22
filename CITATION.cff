@@ -1,0 +1,21 @@
+cff-version: 1.2.0
+message: If you use this deposit, please cite it as below.
+title: 'The Failure That Did Not Happen: Mathematical Companion'
+type: software
+authors:
+- name: David T. Swanson
+version: 1.1.0
+date-released: '2026-11-22'
+repository-code: 'https://github.com/davidtswanson903/failure-that-did-not-happen-companion'
+preferred-citation:
+  type: book
+  title: 'The Failure That Did Not Happen: Prevention, Reform and the Limits of Institutional Response'
+  authors:
+  - family-names: Swanson
+    given-names: David T.
+    orcid: https://orcid.org/0009-0003-0580-6476
+  year: 2026
+  publisher:
+    name: Zenodo
+  version: '1.0'
+  doi: 10.5281/zenodo.24449243
