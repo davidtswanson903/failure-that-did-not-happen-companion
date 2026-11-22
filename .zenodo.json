@@ -1,0 +1,27 @@
+{
+  "title": "The Failure That Did Not Happen: Mathematical Companion",
+  "upload_type": "software",
+  "version": "1.0.0",
+  "publication_date": "2026-11-22",
+  "creators": [
+    {
+      "name": "Swanson, David T.",
+      "orcid": "0009-0003-0580-6476"
+    }
+  ],
+  "description": "<p>The mathematics, proofs and computations behind <em>The Failure That Did Not Happen</em>. It can be read without them, and they can be checked without it.</p>\n<p><strong>Read the paper:</strong> <a href=\"https://github.com/davidtswanson903/failure-that-did-not-happen-companion/blob/1.0.0/paper/companion.pdf\"><em>The Failure That Did Not Happen: Mathematical Companion</em></a> (PDF). It takes a reader from any claim of the Element to the mathematics behind it. Each of the Element’s claims and definitions has an entry under the Element’s own number and title, which reads the claim’s words as formal objects, states and proves what follows, and names the Lean declarations that check the proof. The two models the Element glosses, Model S and Model A, have entries of their own, and a closing map lists every claim with its standing.</p>",
+  "access_right": "open",
+  "license": "Apache-2.0",
+  "keywords": [
+    "institutional decay",
+    "prevention",
+    "collective action",
+    "regulation",
+    "reform",
+    "Lean 4",
+    "formal verification",
+    "simulation"
+  ],
+  "notes": "The scripts and the Lean are under Apache-2.0 (LICENSE). The paper and the figures are under CC BY 4.0 (LICENSE-text). To cite this deposit, use CITATION.cff.",
+  "language": "eng"
+}

@@ -1,0 +1,62 @@
+{
+ "audit_every": 4,
+ "audit_loss": 1.0,
+ "cost_share": 0.3333333333333333,
+ "effective_raises_the_work": true,
+ "effort": {
+  "effective": [
+   70.51332771891745,
+   0.0,
+   0.0,
+   29.486672281082754
+  ],
+  "gamed": [
+   19.399082075764827,
+   0.0,
+   72.54082613181156,
+   8.060091792423501
+  ],
+  "noise": [
+   20.811590165187916,
+   10.83654458662419,
+   0.0,
+   68.35186524818782
+  ],
+  "none": [
+   23.312905784581947,
+   0.0,
+   0.0,
+   76.6870942154179
+  ]
+ },
+ "figure_level": {
+  "effective": 1.75179798425935,
+  "gamed": 6.248855975509258,
+  "noise": 0.9385102453596713,
+  "none": 1.0
+ },
+ "figure_loss": 1.0,
+ "figure_ratio": 6.248855975509258,
+ "gamed_raises_the_figure_and_lowers_the_work": true,
+ "noise_takes_a_little_from_the_work": true,
+ "offices": 1000,
+ "other_loss": 1.0,
+ "raising_share_gamed": 72.54082613181156,
+ "report_share_audit": 10.83654458662419,
+ "seed": 1,
+ "thing_loss": 1.0,
+ "three_groups_sort": true,
+ "uses": 4,
+ "work_fall_audit": 6.148975464032869,
+ "work_fall_figure": 8.197383926699365,
+ "work_gain_thing": 75.179798425935,
+ "work_level": {
+  "effective": 1.75179798425935,
+  "gamed": 0.9180261607330064,
+  "noise": 0.9385102453596713,
+  "none": 1.0
+ },
+ "work_loss_high": 0.7,
+ "work_loss_low": 0.4,
+ "years": 8
+}

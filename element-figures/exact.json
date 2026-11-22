@@ -1,0 +1,60 @@
+{
+ "arrangements": 2704,
+ "between_is_what_no_rule_separates": true,
+ "exactly_at_price": 1171,
+ "exactly_at_price_share": 75.4996776273372,
+ "excess_is_what_the_other_told": true,
+ "largest_excess": 2,
+ "points": [
+  [
+   1,
+   1,
+   830
+  ],
+  [
+   1,
+   2,
+   300
+  ],
+  [
+   2,
+   2,
+   165
+  ],
+  [
+   2,
+   3,
+   60
+  ],
+  [
+   3,
+   3,
+   130
+  ],
+  [
+   3,
+   5,
+   20
+  ],
+  [
+   4,
+   4,
+   30
+  ],
+  [
+   6,
+   6,
+   15
+  ],
+  [
+   10,
+   10,
+   1
+  ]
+ ],
+ "registers": 52,
+ "remedy_never_cheaper": true,
+ "rules": 58158,
+ "states": 5,
+ "with_something_between": 1551
+}

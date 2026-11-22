@@ -1,0 +1,19 @@
+{
+ "balance_holds": true,
+ "bridge_between": 4,
+ "bridge_pairs": 28,
+ "bridge_states": 8,
+ "budget_untold": 12,
+ "chain_never_recovers": true,
+ "chain_settles": true,
+ "dashboard_untold": 56,
+ "inspection_untold": 12,
+ "price_told_elsewhere": 4,
+ "records_pairs": 120,
+ "records_states": 16,
+ "redesign_untold": 56,
+ "refined_between": 0,
+ "refinement_price": 8,
+ "report_untold": 24,
+ "summary_untold": 8
+}

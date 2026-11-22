@@ -1,0 +1,9 @@
+cff-version: 1.2.0
+message: If you use this deposit, please cite it as below.
+title: 'The Failure That Did Not Happen: Mathematical Companion'
+type: software
+authors:
+- name: David T. Swanson
+version: 1.0.0
+date-released: '2026-11-22'
+repository-code: 'https://github.com/davidtswanson903/failure-that-did-not-happen-companion'
